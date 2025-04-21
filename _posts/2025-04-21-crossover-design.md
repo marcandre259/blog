@@ -76,7 +76,7 @@ can be advantageous. However, including additional covariates is touchy,
 especially with a small sample size. The covariates have to be strongly
 correlated with the outcomes and at most weakly correlated with the treatment or
 they could induce bias and/or variation in the difference estimate between
-sub-occipital muscle inhibitiion and deep breathing. That's a jugdment call that
+sub-occipital muscle inhibitiion and deep breathing. That's a judgment call that
 I leave to the subject-matter expert.
 
 ## What's a crossover design?
@@ -100,15 +100,16 @@ This split into sequences or branches of treatment sounds like a lot of trouble,
 but it allows control for time-dependent effects across subjects in the
 analysis. Concretely, this can be done with a statistical model or by simply
 taking the difference of the treatment differences between the treatment
-branches. Shared time-dependent effects between subjects are removed by taking
-this difference.
+branches. Shared time-dependent effects between treatment branches are removed
+by taking this difference.
 
 In theory, a crossover design is great because it isolates the difference in
 treatment effects from spurious time-related things better while keeping
-statistical power relatively high with its taking of within-subject outcome
-measurements. I recommend looking at this clear review paper for a better
-intuition:
-[On the proper use of the crossover design in clinical trials](https://epidownload.i-med.ac.at/download/public/LV%20Ulmer/moi/A%20Series%20on%20Evaluation%20of%20Scientific%20Publications%20%20-%20Deutsches%20%C3%84rzteblatt/Part%2018-On%20the%20Proper%20Use%20of%20the%20Crossover%20Design%20in%20Clinical%20Trials.pdf)
+statistical power relatively high with its measurement of within-subject
+outcomes. I recommend looking at this clear review paper for a better intuition
+of the experimental design: [On the proper use of the crossover design in
+clinical
+trials](https://epidownload.i-med.ac.at/download/public/LV%20Ulmer/moi/A%20Series%20on%20Evaluation%20of%20Scientific%20Publications%20%20-%20Deutsches%20%C3%84rzteblatt/Part%2018-On%20the%20Proper%20Use%20of%20the%20Crossover%20Design%20in%20Clinical%20Trials.pdf)
 
 In practice, you have to account with a so-called wash-out effect. That is the
 effect of one treatment having an effect on the next one given to a subject.
@@ -116,7 +117,7 @@ effect of one treatment having an effect on the next one given to a subject.
 ## Multiple outcomes of interest
 There are multiple outcomes of interest: RMSSD, HF and fellow user _jginestet_
 points to a paper ([An overview of heart rate variability
-metrics](https://pmc.ncbi.nlm.nih.gov/articles/PMC5624990/)) listing 26 outcomes
+metrics](https://pmc.ncbi.nlm.nih.gov/articles/PMC5624990/)) listing 26 measures
 relevant to the analysis of heart rate variability (HRV).
 
 Multiple outcomes is a hornet nest for analysts. Outcomes can be combined in all
@@ -136,7 +137,7 @@ gives a within-subject effect estimate but doesn’t control for period effects
 
 After the first step, take the means of these differences per treatment branch (two branches in this design). In the second step, compute the difference between these two means (e.g., muscle inhibition → deep breathing average minus deep breathing → muscle inhibition average). This removes any additive period effect.
 
-In practice, I’d handle the first step manually and use software for an independent t-test. Here’s an example in R:
+In practice, I’d handle the first step manually and use software to do an independent samples t-test at the second step. Here’s an example in R:
 
 ```R
 # First step: difference within subjects
@@ -161,12 +162,17 @@ t.test(
 
 In [On the proper use of the crossover design in clinical
 trials](https://epidownload.i-med.ac.at/download/public/LV%20Ulmer/moi/A%20Series%20on%20Evaluation%20of%20Scientific%20Publications%20%20-%20Deutsches%20%C3%84rzteblatt/Part%2018-On%20the%20Proper%20Use%20of%20the%20Crossover%20Design%20in%20Clinical%20Trials.pdf),
-they recommend a Wilcoxon rank-sum test if non-normality is suspected in the within-subject differences. With small samples and continuous outcomes, non-normality often arises due to outliers.
+they recommend a Wilcoxon rank-sum test instead of a t-test if non-normality is
+suspected in the within-subject differences. With small samples and continuous
+outcomes, non-normality often arises due to outliers.
 
 ## Tackling the second question
 **Would you suggest a model that incorporates all measurements directly?**
 
-In your design, the main advantage of a model is its ability to include time-varying covariates like respiratory rate. I find this approach more straightforward: you directly control for subject and period effects while estimating the treatment difference.
+In the $2\times2$ crossover design, the main advantage of a model is its ability
+to include time-varying covariates like respiratory rate. I find this approach
+more straightforward: you directly control for subject and period effects while
+directly estimating the treatment difference.
 
 Here’s a R linear regression example producing the same t-statistic as the two-step approach:
 ```R
@@ -174,7 +180,10 @@ fit1 <- lm(X ~ Treatment + factor(PatientID) + Period, data=crossover_data)
 summary(fit1)
 ```
 
-The `Treatment` variable could represent muscle inhibition. Here, the model controls for subject and period effects. The treatment branch isn’t explicitly included but helps identify the period effect.
+The `Treatment` variable could represent muscle inhibition or deep breathing
+depending on the prefered interpretation. The model explicitely controls for
+subject and period effects. The treatment branch mentioned above isn’t
+explicitly included but allows the identification of the period effect.
 
 A peek at the data structure:
 
