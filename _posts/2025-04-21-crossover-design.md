@@ -1,3 +1,8 @@
+---
+usemathjax: true
+date: 2025-04-21
+---
+
 # Statistical approach to a 2 by 2 crossover design
 - [Statistical approach to a 2 by 2 crossover design](#statistical-approach-to-a-2-by-2-crossover-design)
   - [Question](#question)
