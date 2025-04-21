@@ -82,9 +82,9 @@ I leave to the subject-matter expert.
 ## What's a crossover design?
 The crossover design is a clever way to control for the time-invariant
 characteristics of subjects while removing eventual bias from the time spent in
-observation. One of the ways with which you can imagine that bias appearing is
+observation. For example, you can imagine that bias appearing
 with subjects getting more comfortable with the experimental setting
-between the initial and the post-treatment outcome measurement.
+between the initial and the post-treatment outcome measurements.
 
 To control for bias due to such uncontrolled time-dependent effects, a crossover
 design split the subjects into treatment branches. Each branch receives the
@@ -98,7 +98,7 @@ branch gets the alternative treatment.
 
 This split into sequences or branches of treatment sounds like a lot of trouble,
 but it allows control for time-dependent effects across subjects in the
-analysis. In practice, this can be done with a statistical model or by simply
+analysis. Concretely, this can be done with a statistical model or by simply
 taking the difference of the treatment differences between the treatment
 branches. Shared time-dependent effects between subjects are removed by taking
 this difference.
