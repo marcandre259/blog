@@ -168,7 +168,7 @@ they recommend a Wilcoxon rank-sum test if non-normality is suspected in the wit
 
 In your design, the main advantage of a model is its ability to include time-varying covariates like respiratory rate. I find this approach more straightforward: you directly control for subject and period effects while estimating the treatment difference.
 
-Here’s an R linear regression example producing the same t-statistic as the two-step approach:
+Here’s a R linear regression example producing the same t-statistic as the two-step approach:
 ```R
 fit1 <- lm(X ~ Treatment + factor(PatientID) + Period, data=crossover_data)
 summary(fit1)
