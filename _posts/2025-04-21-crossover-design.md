@@ -1,8 +1,3 @@
-
-Here’s your revised post with minimal style adjustments and error corrections while preserving content:
-
----
-
 # Statistical approach to a 2 by 2 crossover design
 - [Statistical approach to a 2 by 2 crossover design](#statistical-approach-to-a-2-by-2-crossover-design)
   - [Question](#question)
