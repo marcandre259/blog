@@ -82,8 +82,8 @@ I leave to the subject-matter expert.
 ## What's a crossover design?
 The crossover design is a clever way to control for the time-invariant
 characteristics of subjects while removing eventual bias from the time spent in
-observation. One of the ways with which you can image that bias appearing is
-that the subjects are getting more comfortable with the experimental setting
+observation. One of the ways with which you can imagine that bias appearing is
+with subjects getting more comfortable with the experimental setting
 between the initial and the post-treatment outcome measurement.
 
 To control for bias due to such uncontrolled time-dependent effects, a crossover
