@@ -1,5 +1,4 @@
 ---
-layout: post
 usemathjax: true
 date: 2025-04-21
 ---
