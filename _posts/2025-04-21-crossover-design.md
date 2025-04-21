@@ -121,7 +121,7 @@ relevant to the analysis of heart rate variability (HRV).
 
 Multiple outcomes is a hornet nest for analysts. Outcomes can be combined in all
 sorts of way during an analysis with more or less unsavory results. I chose to
-ignore this question and focus on the analysis of a single outcome. User
+ignore this problem and focus on the analysis of a single outcome. User
 _jginestet_ tackles this issue directly and gives relevant recommendations with
 regard to the multiple comparison problems, multivariate statistical modeling
 and small sample analysis.
