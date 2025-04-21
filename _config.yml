@@ -1,7 +1,9 @@
 title: Tapestry of flimsy steps
 author: Marc-André Chénier
-theme: minima
+theme: jekyll-theme-cayman  # MathJax-friendly alternative
+plugins:
+  - jekyll-remote-theme  # Allows GitHub-hosted themes
+
 markdown: kramdown
 kramdown:
   math_engine: mathjax
-  syntax_highlighter: rouge
