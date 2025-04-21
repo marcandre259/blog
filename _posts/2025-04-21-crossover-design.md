@@ -175,4 +175,4 @@ The `Treatment` variable could represent muscle inhibition. Here, the model cont
 
 A peek at the data structure:
 
-![Alt](../docs/assets/crossover_data_example.png)
+![Alt](https://marcandre259.github.io/blog/docs/assets/crossover_data_example.png)
