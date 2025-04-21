@@ -129,7 +129,7 @@ and small sample analysis.
 ## Tackling the first question
 **Whether to use a method that compares pre/post differences?**
 
-The classical two-step approach to crossover design analysis with 2 repeated measures per participant suggests comparing these differences first. This gives a within-subject effect estimate but doesn’t control for period effects (e.g., getting used to the experiment).
+The classical two-step approach to crossover design analysis with 2 repeated measures per participant suggests comparing the pre-post differences first. This gives a within-subject effect estimate but doesn’t control for period effects (e.g., getting used to the experiment).
 
 Next, take the means of these differences per treatment branch (two branches in this design). In the second step, compute the difference between these two means (e.g., muscle inhibition → deep breathing average minus deep breathing → muscle inhibition average). This removes any additive period effect.
 
