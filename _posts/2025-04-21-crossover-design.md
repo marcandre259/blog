@@ -116,7 +116,7 @@ regard to the multiple comparison problems, multivariate statistical modeling
 and small sample analysis.
 
 ## Tackling the first question
-**Regarding the first question: whether to use a method that compares pre/post differences?**
+**Whether to use a method that compares pre/post differences?**
 
 The classical two-step approach to crossover design analysis with 2 repeated measures per participant suggests comparing these differences first. This gives a within-subject effect estimate but doesn’t control for period effects (e.g., getting used to the experiment).
 
@@ -150,7 +150,7 @@ trials](https://epidownload.i-med.ac.at/download/public/LV%20Ulmer/moi/A%20Serie
 they recommend a Wilcoxon rank-sum test if non-normality is suspected in the within-subject differences. With small samples and continuous outcomes, non-normality often arises due to outliers.
 
 ## Tackling the second question
-**Regarding the second question: would you suggest a model that incorporates all measurements directly?**
+**Would you suggest a model that incorporates all measurements directly?**
 
 In your design, the main advantage of a model is its ability to include time-varying covariates like respiratory rate. I find this approach more straightforward—you directly control for subject and period effects while estimating the treatment difference.
 
