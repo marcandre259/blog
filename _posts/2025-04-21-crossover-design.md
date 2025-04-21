@@ -3,10 +3,6 @@ usemathjax: true
 date: 2025-04-21
 ---
 
-<script type="text/javascript" async
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
-</script>
-
 # Statistical approach to a 2 by 2 crossover design
 - [Statistical approach to a 2 by 2 crossover design](#statistical-approach-to-a-2-by-2-crossover-design)
   - [Question](#question)
