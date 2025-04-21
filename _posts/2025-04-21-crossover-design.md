@@ -163,4 +163,5 @@ summary(fit1)
 The `Treatment` variable could represent muscle inhibition. Here, the model controls for subject and period effects. The treatment branch isn’t explicitly included but helps identify the period effect.
 
 A peek at the data structure:
+
 ![](../data/crossover_data_example.png)
