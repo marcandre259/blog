@@ -166,7 +166,7 @@ they recommend a Wilcoxon rank-sum test if non-normality is suspected in the wit
 ## Tackling the second question
 **Would you suggest a model that incorporates all measurements directly?**
 
-In your design, the main advantage of a model is its ability to include time-varying covariates like respiratory rate. I find this approach more straightforward—you directly control for subject and period effects while estimating the treatment difference.
+In your design, the main advantage of a model is its ability to include time-varying covariates like respiratory rate. I find this approach more straightforward: you directly control for subject and period effects while estimating the treatment difference.
 
 Here’s an R linear regression example producing the same t-statistic as the two-step approach:
 ```R
