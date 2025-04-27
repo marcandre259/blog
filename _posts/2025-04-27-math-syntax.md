@@ -46,8 +46,6 @@ include a kind of markdown layer where I specify that the layout is *default*.
 layout: default
 ---
 
-{{ content }}
-
 <!-- Add this MathJax script -->
 <script type="text/javascript" async
     src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
@@ -56,6 +54,8 @@ layout: default
 ```
 
 The LLM assures me that it tried this solution and that it worked. It does not. The blog's style is back, but the math is not rendering.
+
+As a check, I put the *mathjax* import script directly in this blog post.
 
 <!-- Add this MathJax script directly to the post -->
 <script type="text/javascript" async
