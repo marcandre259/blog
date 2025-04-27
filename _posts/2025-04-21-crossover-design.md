@@ -1,5 +1,5 @@
 ---
-usemathjax: true
+title: Statistical approach to a 2 by 2 crossover design
 date: 2025-04-21
 ---
 
