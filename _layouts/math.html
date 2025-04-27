@@ -1,0 +1,24 @@
+---
+layout: default
+---
+
+{% comment %}
+This layout extends the default layout and adds MathJax support.
+It includes the MathJax script right after the theme's head content.
+{% endcomment %}
+
+{{ content }}
+
+<!-- MathJax script and configuration -->
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ TeX: { equationNumbers: { autoNumber: "all" } } }); </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+    type="text/javascript"></script>
+<!-- End of MathJax script and configuration -->

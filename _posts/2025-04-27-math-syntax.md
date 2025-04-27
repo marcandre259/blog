@@ -3,8 +3,6 @@ title: Getting maths to render on this blog
 date: 2025-04-27
 ---
 
-<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
-
 # Going insane trying to get math to render on this blog
 I realized last week that mathematical equations would not render when writing
 on this blog. I had a wild ride trying to get this working already, but now time
