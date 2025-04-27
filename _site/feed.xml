@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-27T16:50:05+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Tapestry of flimsy steps</title><author><name>Marc-André Chénier</name></author><entry><title type="html">Getting maths to render on this blog</title><link href="http://localhost:4000/2025/04/27/math-syntax.html" rel="alternate" type="text/html" title="Getting maths to render on this blog" /><published>2025-04-27T00:00:00+02:00</published><updated>2025-04-27T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/27/math-syntax</id><content type="html" xml:base="http://localhost:4000/2025/04/27/math-syntax.html"><![CDATA[<h1 id="going-insane-trying-to-get-math-to-render-on-this-blog">Going insane trying to get math to render on this blog</h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-27T17:20:55+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Tapestry of flimsy steps</title><author><name>Marc-André Chénier</name></author><entry><title type="html">Getting maths to render on this blog</title><link href="http://localhost:4000/2025/04/27/math-syntax.html" rel="alternate" type="text/html" title="Getting maths to render on this blog" /><published>2025-04-27T00:00:00+02:00</published><updated>2025-04-27T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/27/math-syntax</id><content type="html" xml:base="http://localhost:4000/2025/04/27/math-syntax.html"><![CDATA[<h1 id="going-insane-trying-to-get-math-to-render-on-this-blog">Going insane trying to get math to render on this blog</h1>
 <p>I realized last week that mathematical equations would not render when writing
-on this blog. I had a wild ride trying to get this working already, but now time
+on this blog. I had a wild ride trying to get this working already, but now the time
 has come to get those equations to render.</p>
 
 <p>By rendering math, I mean getting LaTeX syntax to show up as nice, high
@@ -15,7 +15,7 @@ as much context as possible about the issue. Namely, I give:</p>
   <li>That I am using github pages to deploy the blog.</li>
   <li>What is in the _config.yml file of my blog.</li>
   <li>The issue itself, namely that I’d like to see something like $\frac{x}{2}$
-rendered properly.</li>
+rendered properly (if it does not show up as mangled LaTeX, the mission was successful).</li>
 </ul>
 
 <p>As a sidenote, I started using the Pro and Flash iterations of the Gemini 2.5
@@ -24,10 +24,10 @@ of the model are free as in free beer.</p>
 
 <h2 id="taking-the-llm-to-heart">Taking the LLM to heart</h2>
 <p>The first recommendation of the LLM is to create a <code class="language-plaintext highlighter-rouge">default.html</code> layout that
-overides the basic <em>minima</em> layout of the blog.</p>
+overrides the basic <em>minima</em> layout of the blog.</p>
 
-<p>To do this, I copy and paste the entry blog page to default.html and add some
-instructions to import <em>mathjax</em>. <em>mathjax</em> is the package that should renders
+<p>To do this, I copy and paste the main blog page to default.html and add some
+instructions to import <em>mathjax</em>. <em>mathjax</em> is the package that should render
 the maths.</p>
 
 <p>Doing this destroys the blog’s styling and does not render the maths.</p>
@@ -53,7 +53,7 @@ layout: default
 <p>As a check, I put the <em>mathjax</em> import script directly in this blog post.</p>
 
 <p>This also did not work. In a further query, the LLM recommended I include
-<em>mathjax</em> explicitely in my <code class="language-plaintext highlighter-rouge">_config.yml</code>.</p>
+<em>mathjax</em> explicitly in my <code class="language-plaintext highlighter-rouge">_config.yml</code>.</p>
 
 <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">title</span><span class="pi">:</span> <span class="s">Tapestry of flimsy steps</span>
 <span class="na">author</span><span class="pi">:</span> <span class="s">Marc-André Chénier</span>
@@ -77,7 +77,35 @@ layout: default
 
 <p>This should be the one…</p>
 
-\[\int x^2y \delta x\]]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Going insane trying to get math to render on this blog I realized last week that mathematical equations would not render when writing on this blog. I had a wild ride trying to get this working already, but now time has come to get those equations to render.]]></summary></entry><entry><title type="html">Statistical approach to a 2 by 2 crossover design</title><link href="http://localhost:4000/2025/04/21/crossover-design.html" rel="alternate" type="text/html" title="Statistical approach to a 2 by 2 crossover design" /><published>2025-04-21T00:00:00+02:00</published><updated>2025-04-21T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/21/crossover-design</id><content type="html" xml:base="http://localhost:4000/2025/04/21/crossover-design.html"><![CDATA[<h1 id="statistical-approach-to-a-2-by-2-crossover-design">Statistical approach to a 2 by 2 crossover design</h1>
+\[\int x^2y \delta x\]
+
+<h2 id="at-last">At last</h2>
+<p>What got things rolling is finding out about <a href="https://github.com/Csega/csega.github.io">csega’s
+blog</a> blog. He has a post on there
+where he makes a similarly heroic attempt to render $\frac{x}{2}$. Since he’s
+also using <em>jekyll</em> as his site generator, it gave me confidence this feat is
+possible.</p>
+
+<p>I then went ahead and install <em>jekyll</em> locally so I could serve and quickly debug the website from my laptop. This can be done with</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll serve
+</code></pre></div></div>
+
+<p>I had some issues getting <em>jekyll</em> to compile but most were solved with a variation of:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem <span class="nb">install</span> ...
+</code></pre></div></div>
+
+<p><em>Gem</em> is <em>Ruby</em>’s package manager. With this set-up, debugging went a lot
+faster. I also went ahead and <em>vibe-coded</em> the rest with <em>cline</em>.</p>
+
+<p><em>Cline</em> is an extension for the <em>VS Code</em> editor. It gives you a chat interface
+for LLMs, along with some tools to read and edit your project files. Very much
+like <em>Cursor</em>, except that you can set it up with an API of your choice without
+having to pay a subscription.</p>
+
+<p>On the one hand, I could have spent this sunny afternoon reading jekyll’s and
+github pages documentation at length instead of iterating with an LLM. On the other hand, some blockers are nice to just push aside with <em>vibe-coding</em>.</p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Going insane trying to get math to render on this blog I realized last week that mathematical equations would not render when writing on this blog. I had a wild ride trying to get this working already, but now the time has come to get those equations to render.]]></summary></entry><entry><title type="html">Statistical approach to a 2 by 2 crossover design</title><link href="http://localhost:4000/2025/04/21/crossover-design.html" rel="alternate" type="text/html" title="Statistical approach to a 2 by 2 crossover design" /><published>2025-04-21T00:00:00+02:00</published><updated>2025-04-21T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/21/crossover-design</id><content type="html" xml:base="http://localhost:4000/2025/04/21/crossover-design.html"><![CDATA[<h1 id="statistical-approach-to-a-2-by-2-crossover-design">Statistical approach to a 2 by 2 crossover design</h1>
 <ul>
   <li><a href="#statistical-approach-to-a-2-by-2-crossover-design">Statistical approach to a 2 by 2 crossover design</a>
     <ul>
