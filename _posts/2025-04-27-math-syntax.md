@@ -19,7 +19,7 @@ as much context as possible about the issue. Namely, I give:
 - The structure of the blog's project, so the folders and files within.
 - That I am using github pages to deploy the blog.
 - What is in the _config.yml file of my blog.
-- The issue itself, namely that I'd like to see something like $\frac{x}{2}$
+- The issue itself, namely that I'd like to see something like {% raw %}$\frac{x}{2}${% endraw %}
   rendered properly.
 
 As a sidenote, I started using the Pro and Flash iterations of the Gemini 2.5
