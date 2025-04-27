@@ -192,4 +192,4 @@ explicitly included but allows the identification of the period effect.
 
 A peek at the data structure:
 
-![Alt](https://marcandre259.github.io/blog/docs/assets/crossover_data_example.png)
+![Alt](https://marcandre259.github.io/blog/assets/crossover_data_example.png)
