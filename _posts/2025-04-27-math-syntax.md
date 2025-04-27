@@ -72,4 +72,4 @@ kramdown:
 ```
 
 I had good hopes, but this approach also failed. The next suggestion is to sandwich LaTeX expressions in a
-\{% raw %\} routine. Again, without success.
+*raw* html routine. Again, without success.
