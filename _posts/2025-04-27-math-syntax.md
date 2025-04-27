@@ -94,7 +94,7 @@ where he makes a similarly heroic attempt to render $\frac{x}{2}$. Since he's
 also using *jekyll* as his site generator, it gave me confidence this feat is
 possible.
 
-I then went ahead and install *jekyll* locally so I could serve and quickly debug the website from my laptop. This can be done with
+I then went ahead and installed *jekyll* locally so I could serve and quickly debug the website from my laptop. This can be done with
 
 ```bash
 jekyll serve
