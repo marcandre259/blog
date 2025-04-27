@@ -1,8 +1,9 @@
 ---
 title: Getting maths to render on this blog
-layout: math
 date: 2025-04-27
 ---
+
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
 # Going insane trying to get math to render on this blog
 I realized last week that mathematical equations would not render when writing
