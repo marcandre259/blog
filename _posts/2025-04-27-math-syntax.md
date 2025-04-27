@@ -63,3 +63,18 @@ As a check, I put the *mathjax* import script directly in this blog post.
 </script>
 <!-- End of MathJax script -->
 
+This also did not work. In a further query, the LLM recommended I include
+*mathjax* explicitely in my `_config.yml`.
+
+```yaml
+title: Tapestry of flimsy steps
+author: Marc-André Chénier
+theme: minima
+
+kramdown:
+  math_engine: mathjax
+  syntax_highlighter: rouge
+  input: GFM # Optional: Use GitHub Flavored Markdown
+```
+
+I had good hopes, but this approach also failed.
