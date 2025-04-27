@@ -75,7 +75,14 @@ I had good hopes, but this approach also failed. The next suggestion is to sandw
 *raw* html routine. Again, without success.
 
 ## Other attempts
-Here is an inline fraction: \(\frac{x}{2}\).
+Here is an inline fraction:
+\(\frac{x}{2}\).
 
 Here is a display equation:
 \[ a^2 + b^2 = c^2 \]
+
+This should be the one...
+
+$$
+\int x^2y \delta x
+$$

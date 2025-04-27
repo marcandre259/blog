@@ -1,5 +1,6 @@
 ---
 title: Statistical approach to a 2 by 2 crossover design
+layout: math
 date: 2025-04-21
 ---
 
@@ -174,7 +175,7 @@ outcomes, non-normality often arises due to outliers.
 ## Tackling the second question
 **Would you suggest a model that incorporates all measurements directly?**
 
-In the 2 by 2 crossover design, the main advantage of a model is its ability to
+In the $2 \times 2$ crossover design, the main advantage of a model is its ability to
 include time-varying covariates like respiratory rate. I also find this approach
 more straightforward: you directly control for subject and period effects while
 directly estimating the treatment difference.

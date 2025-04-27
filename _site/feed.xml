@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-27T16:30:48+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Tapestry of flimsy steps</title><author><name>Marc-André Chénier</name></author><entry><title type="html">Getting maths to render on this blog</title><link href="http://localhost:4000/2025/04/27/math-syntax.html" rel="alternate" type="text/html" title="Getting maths to render on this blog" /><published>2025-04-27T00:00:00+02:00</published><updated>2025-04-27T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/27/math-syntax</id><content type="html" xml:base="http://localhost:4000/2025/04/27/math-syntax.html"><![CDATA[<h1 id="going-insane-trying-to-get-math-to-render-on-this-blog">Going insane trying to get math to render on this blog</h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-27T16:50:05+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Tapestry of flimsy steps</title><author><name>Marc-André Chénier</name></author><entry><title type="html">Getting maths to render on this blog</title><link href="http://localhost:4000/2025/04/27/math-syntax.html" rel="alternate" type="text/html" title="Getting maths to render on this blog" /><published>2025-04-27T00:00:00+02:00</published><updated>2025-04-27T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/27/math-syntax</id><content type="html" xml:base="http://localhost:4000/2025/04/27/math-syntax.html"><![CDATA[<h1 id="going-insane-trying-to-get-math-to-render-on-this-blog">Going insane trying to get math to render on this blog</h1>
 <p>I realized last week that mathematical equations would not render when writing
 on this blog. I had a wild ride trying to get this working already, but now time
 has come to get those equations to render.</p>
@@ -69,10 +69,15 @@ layout: default
 <em>raw</em> html routine. Again, without success.</p>
 
 <h2 id="other-attempts">Other attempts</h2>
-<p>Here is an inline fraction: (\frac{x}{2}).</p>
+<p>Here is an inline fraction:
+(\frac{x}{2}).</p>
 
 <p>Here is a display equation:
-[ a^2 + b^2 = c^2 ]</p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Going insane trying to get math to render on this blog I realized last week that mathematical equations would not render when writing on this blog. I had a wild ride trying to get this working already, but now time has come to get those equations to render.]]></summary></entry><entry><title type="html">Statistical approach to a 2 by 2 crossover design</title><link href="http://localhost:4000/2025/04/21/crossover-design.html" rel="alternate" type="text/html" title="Statistical approach to a 2 by 2 crossover design" /><published>2025-04-21T00:00:00+02:00</published><updated>2025-04-21T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/21/crossover-design</id><content type="html" xml:base="http://localhost:4000/2025/04/21/crossover-design.html"><![CDATA[<h1 id="statistical-approach-to-a-2-by-2-crossover-design">Statistical approach to a 2 by 2 crossover design</h1>
+[ a^2 + b^2 = c^2 ]</p>
+
+<p>This should be the one…</p>
+
+\[\int x^2y \delta x\]]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Going insane trying to get math to render on this blog I realized last week that mathematical equations would not render when writing on this blog. I had a wild ride trying to get this working already, but now time has come to get those equations to render.]]></summary></entry><entry><title type="html">Statistical approach to a 2 by 2 crossover design</title><link href="http://localhost:4000/2025/04/21/crossover-design.html" rel="alternate" type="text/html" title="Statistical approach to a 2 by 2 crossover design" /><published>2025-04-21T00:00:00+02:00</published><updated>2025-04-21T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/21/crossover-design</id><content type="html" xml:base="http://localhost:4000/2025/04/21/crossover-design.html"><![CDATA[<h1 id="statistical-approach-to-a-2-by-2-crossover-design">Statistical approach to a 2 by 2 crossover design</h1>
 <ul>
   <li><a href="#statistical-approach-to-a-2-by-2-crossover-design">Statistical approach to a 2 by 2 crossover design</a>
     <ul>
@@ -248,7 +253,7 @@ outcomes, non-normality often arises due to outliers.</p>
 <h2 id="tackling-the-second-question">Tackling the second question</h2>
 <p><strong>Would you suggest a model that incorporates all measurements directly?</strong></p>
 
-<p>In the 2 by 2 crossover design, the main advantage of a model is its ability to
+<p>In the $2 \times 2$ crossover design, the main advantage of a model is its ability to
 include time-varying covariates like respiratory rate. I also find this approach
 more straightforward: you directly control for subject and period effects while
 directly estimating the treatment difference.</p>
