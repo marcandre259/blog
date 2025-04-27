@@ -1,15 +1,15 @@
 ---
 title: Getting maths to render on this blog
-layout: math
+layout: post
 date: 2025-04-27
 ---
 
-# Going insane trying to get maths to render on this blog
+# Going insane trying to get math to render on this blog
 I realized last week that mathematical equations would not render when writing
 on this blog. I had a wild ride trying to get this working already, but now time
 has come to get those equations to render.
 
-By rendering maths, I mean getting LaTeX syntax to show up as nice, high
+By rendering math, I mean getting LaTeX syntax to show up as nice, high
 resolution pictures or scalable vector graphics. This blog post will end with
 such graphics.
 
@@ -35,3 +35,31 @@ instructions to import *mathjax*. *mathjax* is the package that should renders
 the maths.
 
 Doing this destroys the blog's styling and does not render the maths.
+
+## It works on the LLM's computer
+The approach is to instead extend the default *minima* style of the blog. So I
+get rid of `default.html` and create a `math.html` file instead. In that file, I
+include a kind of markdown layer where I specify that the layout is *default*.
+
+```html
+---
+layout: default
+---
+
+{{ content }}
+
+<!-- Add this MathJax script -->
+<script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+<!-- End of MathJax script -->
+```
+
+The LLM assures me that it tried this solution and that it worked. It does not. The blog's style is back, but the math is not rendering.
+
+<!-- Add this MathJax script directly to the post -->
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<!-- End of MathJax script -->
+
