@@ -1,4 +1,5 @@
 ---
+layout: math
 title: Getting maths to render on this blog
 date: 2025-04-27
 ---
@@ -72,3 +73,9 @@ kramdown:
 
 I had good hopes, but this approach also failed. The next suggestion is to sandwich LaTeX expressions in a
 *raw* html routine. Again, without success.
+
+## Other attempts
+Here is an inline fraction: \(\frac{x}{2}\).
+
+Here is a display equation:
+\[ a^2 + b^2 = c^2 \]

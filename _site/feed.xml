@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-27T16:30:48+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Tapestry of flimsy steps</title><author><name>Marc-André Chénier</name></author><entry><title type="html">Getting maths to render on this blog</title><link href="http://localhost:4000/2025/04/27/math-syntax.html" rel="alternate" type="text/html" title="Getting maths to render on this blog" /><published>2025-04-27T00:00:00+02:00</published><updated>2025-04-27T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/27/math-syntax</id><content type="html" xml:base="http://localhost:4000/2025/04/27/math-syntax.html"><![CDATA[<h1 id="going-insane-trying-to-get-math-to-render-on-this-blog">Going insane trying to get math to render on this blog</h1>
+<p>I realized last week that mathematical equations would not render when writing
+on this blog. I had a wild ride trying to get this working already, but now time
+has come to get those equations to render.</p>
+
+<p>By rendering math, I mean getting LaTeX syntax to show up as nice, high
+resolution pictures or scalable vector graphics. This blog post will end with
+such graphics.</p>
+
+<h2 id="methodology">Methodology</h2>
+<p>My approach is to give the google’s Gemini 2.5 Flash large language model (LLM)
+as much context as possible about the issue. Namely, I give:</p>
+<ul>
+  <li>The structure of the blog’s project, so the folders and files within.</li>
+  <li>That I am using github pages to deploy the blog.</li>
+  <li>What is in the _config.yml file of my blog.</li>
+  <li>The issue itself, namely that I’d like to see something like $\frac{x}{2}$
+rendered properly.</li>
+</ul>
+
+<p>As a sidenote, I started using the Pro and Flash iterations of the Gemini 2.5
+model last week and really like them. At the moment, the experimental versions
+of the model are free as in free beer.</p>
+
+<h2 id="taking-the-llm-to-heart">Taking the LLM to heart</h2>
+<p>The first recommendation of the LLM is to create a <code class="language-plaintext highlighter-rouge">default.html</code> layout that
+overides the basic <em>minima</em> layout of the blog.</p>
+
+<p>To do this, I copy and paste the entry blog page to default.html and add some
+instructions to import <em>mathjax</em>. <em>mathjax</em> is the package that should renders
+the maths.</p>
+
+<p>Doing this destroys the blog’s styling and does not render the maths.</p>
+
+<h2 id="it-works-on-the-llms-computer">It works on the LLM’s computer</h2>
+<p>The approach is to instead extend the default <em>minima</em> style of the blog. So I
+get rid of <code class="language-plaintext highlighter-rouge">default.html</code> and create a <code class="language-plaintext highlighter-rouge">math.html</code> file instead. In that file, I
+include a kind of markdown layer where I specify that the layout is <em>default</em>.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
+layout: default
+---
+
+<span class="c">&lt;!-- Add this MathJax script --&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">async</span>
+    <span class="na">src=</span><span class="s">"https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;/script&gt;</span>
+<span class="c">&lt;!-- End of MathJax script --&gt;</span>
+</code></pre></div></div>
+
+<p>The LLM assures me that it tried this solution and that it worked. It does not. The blog’s style is back, but the math is not rendering.</p>
+
+<p>As a check, I put the <em>mathjax</em> import script directly in this blog post.</p>
+
+<p>This also did not work. In a further query, the LLM recommended I include
+<em>mathjax</em> explicitely in my <code class="language-plaintext highlighter-rouge">_config.yml</code>.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">title</span><span class="pi">:</span> <span class="s">Tapestry of flimsy steps</span>
+<span class="na">author</span><span class="pi">:</span> <span class="s">Marc-André Chénier</span>
+<span class="na">theme</span><span class="pi">:</span> <span class="s">minima</span>
+
+<span class="na">kramdown</span><span class="pi">:</span>
+  <span class="na">math_engine</span><span class="pi">:</span> <span class="s">mathjax</span>
+  <span class="na">syntax_highlighter</span><span class="pi">:</span> <span class="s">rouge</span>
+  <span class="na">input</span><span class="pi">:</span> <span class="s">GFM</span> <span class="c1"># Optional: Use GitHub Flavored Markdown</span>
+</code></pre></div></div>
+
+<p>I had good hopes, but this approach also failed. The next suggestion is to sandwich LaTeX expressions in a
+<em>raw</em> html routine. Again, without success.</p>
+
+<h2 id="other-attempts">Other attempts</h2>
+<p>Here is an inline fraction: (\frac{x}{2}).</p>
+
+<p>Here is a display equation:
+[ a^2 + b^2 = c^2 ]</p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Going insane trying to get math to render on this blog I realized last week that mathematical equations would not render when writing on this blog. I had a wild ride trying to get this working already, but now time has come to get those equations to render.]]></summary></entry><entry><title type="html">Statistical approach to a 2 by 2 crossover design</title><link href="http://localhost:4000/2025/04/21/crossover-design.html" rel="alternate" type="text/html" title="Statistical approach to a 2 by 2 crossover design" /><published>2025-04-21T00:00:00+02:00</published><updated>2025-04-21T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/21/crossover-design</id><content type="html" xml:base="http://localhost:4000/2025/04/21/crossover-design.html"><![CDATA[<h1 id="statistical-approach-to-a-2-by-2-crossover-design">Statistical approach to a 2 by 2 crossover design</h1>
+<ul>
+  <li><a href="#statistical-approach-to-a-2-by-2-crossover-design">Statistical approach to a 2 by 2 crossover design</a>
+    <ul>
+      <li><a href="#question">Question</a></li>
+      <li><a href="#two-questions-in-one">Two questions in one</a></li>
+      <li><a href="#whats-a-crossover-design">What’s a crossover design?</a></li>
+      <li><a href="#multiple-outcomes-of-interest">Multiple outcomes of interest</a></li>
+      <li><a href="#tackling-the-first-question">Tackling the first question</a></li>
+      <li><a href="#tackling-the-second-question">Tackling the second question</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="question">Question</h2>
+<p>This blog post is taken from a question I answered on cross validated during
+the week-end. I have had this blog on the backburner for a while, and that is as
+good of an opportunity to properly start it as I will get. You can find the <em>q &amp;
+a</em> thread here:
+<a href="https://stats.stackexchange.com/questions/664399/which-statistical-test-would-you-recommend-for-comparing-two-interventions-in-a/664416#664416">cross-validated</a>.
+The original question from user <em>AB108</em> is:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>I’m conducting a randomized crossover trial with 16 participants, where each
+subject receives two interventions (sub-occipital muscle inhibition and deep
+breathing). For each intervention, heart rate variability (HRV) metrics (e.g.,
+RMSSD and HF) are recorded before and after the intervention.
+
+I’m aiming to determine whether one intervention leads to greater
+parasympathetic activation than the other, based on these HRV measures.
+
+The design involves: Repeated measures (pre and post) Two conditions per
+participant A small sample size (n = 17) A few potential covariates (e.g.,
+stress level, respiratory rate)
+
+ What statistical approach would you recommend for analyzing this kind of data?
+ Would you use a method that compares pre/post differences (deltas), or would
+you suggest a model that incorporates all measurements directly? I'm
+particularly interested in approaches that account for within-subject
+variability and repeated measures.
+</code></pre></div></div>
+
+<p>Here are initial thoughts about the question:</p>
+<ul>
+  <li>It is actually two questions in one</li>
+  <li>I have not heard of crossover design before</li>
+  <li>There are multiple outcomes of interest and it is not clear how the inquirer
+plans to combine or include them in his analysis.</li>
+  <li><em>AB108</em> (the inquirer) is interested about including covariates in the analysis.</li>
+</ul>
+
+<h2 id="two-questions-in-one">Two questions in one</h2>
+<p>The first question is about the desirability of analysing the pre-post
+difference in outcomes. For example, this could be taking the difference in
+RMSSD. Typically, a pre-post analysis would denote taking the difference of the
+outcome after versus the outcome before receiving a treatment, but here we are
+comparing two treatments: sub-occipital muscle inhibition and deep breathing. So
+we just take the difference in outcome between two treatments, and forget about
+the baseline (i.e. not treatment).</p>
+
+<p>In general, a pre-post analysis is a waste of time. You can often
+argue that something unrelated to the difference of interest happens between the two
+interventions given to a subject. That makes it difficult to defend a causal
+statement.</p>
+
+<p>Nevertheless, taking a pre-post difference does control for what is known as
+time-invariant subject characteristics. Those are things like your natural hair
+color or your neuroticism. To be a bit more precise, a time-invariant
+characteristic is something that stays constant during the period of the
+experiment. That makes taking the pre-post difference a good tactic to reduce
+the variation of the outcome of interest (for ex. the RMSSD here). At equal
+sample size, this increases the power of a statistical test on that difference.</p>
+
+<p>The second question: <em>would you suggest a model that incorporates all
+measurements directly?</em> is unclear. Namely if it is suggested to include <em>all
+measurements</em> in a model. Assuming they are valid, I would not exclude
+measurements from an analysis, regardless of whether I am specifying a
+statistical model or not.</p>
+
+<p>I chose to interpret it as whether it is worth it to specify a model. A model
+lets us control for additional measured covariates such as stress level, so it
+can be advantageous. However, including additional covariates is touchy,
+especially with a small sample size. The covariates have to be strongly
+correlated with the outcomes and at most weakly correlated with the treatment or
+they could induce bias and/or variation in the difference estimate between
+sub-occipital muscle inhibitiion and deep breathing. That’s a judgment call that
+I leave to the subject-matter expert.</p>
+
+<h2 id="whats-a-crossover-design">What’s a crossover design?</h2>
+<p>The crossover design is a clever way to control for the time-invariant
+characteristics of subjects while removing eventual bias from the time spent in
+observation. For example, you can imagine that bias appearing
+with subjects getting more comfortable with the experimental setting
+between the initial and the post-treatment outcome measurements.</p>
+
+<p>To control for bias due to such uncontrolled time-dependent effects, a crossover
+design split the subjects into treatment branches. Each branch receives the
+treatments or lack thereof (for ex. placebo), in a different sequence. In the
+question, the inquirer is tackling a case with two observations, <em>pre and post</em>,
+and two treatment, sub-occipital muscle inhibition and deep breathing. Subjects
+in the first branch then get one treatment, say muscle inhibition, at the <em>pre</em>
+observation period, while subjects in the second treatment branch receive deep
+breathing in the <em>pre</em> period. In the second period of observation, <em>post</em>, each
+branch gets the alternative treatment.</p>
+
+<p>This split into sequences or branches of treatment sounds like a lot of trouble,
+but it allows control for time-dependent effects across subjects in the
+analysis. Concretely, this can be done with a statistical model or by simply
+taking the difference of the treatment differences between the treatment
+branches. Shared time-dependent effects between treatment branches are removed
+by taking this difference.</p>
+
+<p>In theory, a crossover design is great because it isolates the difference in
+treatment effects from spurious time-related things better while keeping
+statistical power relatively high with its measurement of within-subject
+outcomes. I recommend looking at this clear review paper for a better intuition
+of the experimental design: <a href="https://epidownload.i-med.ac.at/download/public/LV%20Ulmer/moi/A%20Series%20on%20Evaluation%20of%20Scientific%20Publications%20%20-%20Deutsches%20%C3%84rzteblatt/Part%2018-On%20the%20Proper%20Use%20of%20the%20Crossover%20Design%20in%20Clinical%20Trials.pdf">On the proper use of the crossover design in
+clinical
+trials</a></p>
+
+<p>In practice, you have to account with a so-called wash-out effect. That is the
+effect of one treatment having an effect on the next one given to a subject.</p>
+
+<h2 id="multiple-outcomes-of-interest">Multiple outcomes of interest</h2>
+<p>There are multiple outcomes of interest: RMSSD, HF and fellow user <em>jginestet</em>
+points to a paper (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5624990/">An overview of heart rate variability
+metrics</a>) listing 26 measures
+relevant to the analysis of heart rate variability (HRV).</p>
+
+<p>Multiple outcomes is a hornet nest for analysts. Outcomes can be combined in all
+sorts of way during an analysis with more or less unsavory results. I chose to
+ignore this problem and focus on the analysis of a single outcome. User
+<em>jginestet</em> tackles this issue directly and gives relevant recommendations with
+regard to the multiple comparison problems, multivariate statistical modeling
+and small sample analysis.</p>
+
+<h2 id="tackling-the-first-question">Tackling the first question</h2>
+<p><strong>Whether to use a method that compares pre/post differences?</strong></p>
+
+<p>The classical two-step approach to crossover design analysis with 2 repeated
+measures per participant suggests comparing the pre-post differences first. This
+gives a within-subject effect estimate but doesn’t control for period effects
+(e.g., getting used to the experiment). That’s where the second step of the approach comes in.</p>
+
+<p>After the first step, take the means of these differences per treatment branch (two branches in this design). In the second step, compute the difference between these two means (e.g., muscle inhibition → deep breathing average minus deep breathing → muscle inhibition average). This removes any additive period effect.</p>
+
+<p>In practice, I’d handle the first step manually and use software to do an independent samples t-test at the second step. Here’s an example in R:</p>
+
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># First step: difference within subjects</span><span class="w">
+</span><span class="n">crossover_patient_split</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">split</span><span class="p">(</span><span class="n">crossover_data</span><span class="p">,</span><span class="w"> </span><span class="n">crossover_data</span><span class="o">$</span><span class="n">PatientID</span><span class="p">)</span><span class="w">
+</span><span class="n">patient_diff_df</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">do.call</span><span class="p">(</span><span class="s2">"rbind"</span><span class="p">,</span><span class="w">
+  </span><span class="n">lapply</span><span class="p">(</span><span class="n">crossover_patient_split</span><span class="p">,</span><span class="w"> </span><span class="n">FUN</span><span class="o">=</span><span class="k">function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="n">data.frame</span><span class="p">(</span><span class="w">
+      </span><span class="n">period_diff</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="o">$</span><span class="n">X</span><span class="p">[</span><span class="n">x</span><span class="o">$</span><span class="n">Period</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">x</span><span class="o">$</span><span class="n">X</span><span class="p">[</span><span class="n">x</span><span class="o">$</span><span class="n">Period</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="m">2</span><span class="p">]),</span><span class="w">  </span><span class="c1"># Corrected syntax</span><span class="w">
+      </span><span class="n">PatientID</span><span class="o">=</span><span class="n">x</span><span class="o">$</span><span class="n">PatientID</span><span class="p">[</span><span class="m">1</span><span class="p">],</span><span class="w">
+      </span><span class="n">Sequence</span><span class="o">=</span><span class="n">x</span><span class="o">$</span><span class="n">Sequence</span><span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w">  </span><span class="c1"># Seq. 1: A→B, Seq. 2: B→A</span><span class="w">
+    </span><span class="p">)</span><span class="w">
+  </span><span class="p">})</span><span class="w">
+</span><span class="p">)</span><span class="w">
+
+</span><span class="c1"># Second step: t-test on the difference between sequences</span><span class="w">
+</span><span class="n">t.test</span><span class="p">(</span><span class="w">
+  </span><span class="n">period_diff</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">Sequence</span><span class="p">,</span><span class="w">
+  </span><span class="n">data</span><span class="o">=</span><span class="n">patient_diff_df</span><span class="p">,</span><span class="w">
+  </span><span class="n">var.equal</span><span class="o">=</span><span class="kc">TRUE</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>In <a href="https://epidownload.i-med.ac.at/download/public/LV%20Ulmer/moi/A%20Series%20on%20Evaluation%20of%20Scientific%20Publications%20%20-%20Deutsches%20%C3%84rzteblatt/Part%2018-On%20the%20Proper%20Use%20of%20the%20Crossover%20Design%20in%20Clinical%20Trials.pdf">On the proper use of the crossover design in clinical
+trials</a>,
+they recommend a Wilcoxon rank-sum test instead of a t-test if non-normality is
+suspected in the within-subject differences. With small samples and continuous
+outcomes, non-normality often arises due to outliers.</p>
+
+<h2 id="tackling-the-second-question">Tackling the second question</h2>
+<p><strong>Would you suggest a model that incorporates all measurements directly?</strong></p>
+
+<p>In the 2 by 2 crossover design, the main advantage of a model is its ability to
+include time-varying covariates like respiratory rate. I also find this approach
+more straightforward: you directly control for subject and period effects while
+directly estimating the treatment difference.</p>
+
+<p>Here’s a R linear regression example producing the same t-statistic as the two-step approach:</p>
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">fit1</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">lm</span><span class="p">(</span><span class="n">X</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">Treatment</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">factor</span><span class="p">(</span><span class="n">PatientID</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Period</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="o">=</span><span class="n">crossover_data</span><span class="p">)</span><span class="w">
+</span><span class="n">summary</span><span class="p">(</span><span class="n">fit1</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">Treatment</code> variable could represent muscle inhibition or deep breathing
+depending on the prefered interpretation. The model explicitely controls for
+subject and period effects. The treatment branch mentioned above isn’t
+explicitly included but allows the identification of the period effect.</p>
+
+<p>A peek at the data structure:</p>
+
+<p><img src="https://marcandre259.github.io/blog/assets/crossover_data_example.png" alt="Alt" /></p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Statistical approach to a 2 by 2 crossover design Statistical approach to a 2 by 2 crossover design Question Two questions in one What’s a crossover design? Multiple outcomes of interest Tackling the first question Tackling the second question]]></summary></entry><entry><title type="html">Launching this blog</title><link href="http://localhost:4000/2024/09/29/launch.html" rel="alternate" type="text/html" title="Launching this blog" /><published>2024-09-29T00:00:00+02:00</published><updated>2024-09-29T00:00:00+02:00</updated><id>http://localhost:4000/2024/09/29/launch</id><content type="html" xml:base="http://localhost:4000/2024/09/29/launch.html"><![CDATA[<p>This post will probably be removed once the blog gets some steam. Until then, it will be a reminder of its humble beginning.</p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[This post will probably be removed once the blog gets some steam. Until then, it will be a reminder of its humble beginning.]]></summary></entry></feed>
