@@ -3,6 +3,7 @@ author: Marc-André Chénier
 theme: minima
 
 kramdown:
-  math_engine: mathjax
+  # math_engine: mathjax
   syntax_highlighter: rouge
   input: GFM # Optional: Use GitHub Flavored Markdown
+  disable_math: true

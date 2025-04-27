@@ -1,6 +1,6 @@
 ---
 title: Getting maths to render on this blog
-layout: post
+layout: math
 date: 2025-04-27
 ---
 
@@ -19,7 +19,7 @@ as much context as possible about the issue. Namely, I give:
 - The structure of the blog's project, so the folders and files within.
 - That I am using github pages to deploy the blog.
 - What is in the _config.yml file of my blog.
-- The issue itself, namely that I'd like to see something like {% raw %}$\frac{x}{2}${% endraw %}
+- The issue itself, namely that I'd like to see something like $\frac{x}{2}$
   rendered properly.
 
 As a sidenote, I started using the Pro and Flash iterations of the Gemini 2.5
@@ -57,12 +57,6 @@ The LLM assures me that it tried this solution and that it worked. It does not. 
 
 As a check, I put the *mathjax* import script directly in this blog post.
 
-<!-- Add this MathJax script directly to the post -->
-<script type="text/javascript" async
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
-</script>
-<!-- End of MathJax script -->
-
 This also did not work. In a further query, the LLM recommended I include
 *mathjax* explicitely in my `_config.yml`.
 
@@ -77,4 +71,5 @@ kramdown:
   input: GFM # Optional: Use GitHub Flavored Markdown
 ```
 
-I had good hopes, but this approach also failed.
+I had good hopes, but this approach also failed. The next suggestion is to sandwich LaTeX expressions in a
+`{% raw %}` routine. Again, without success.
