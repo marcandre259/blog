@@ -1,6 +1,6 @@
 ---
 layout: math
-title: Getting maths to render on this blog
+title: Getting math to render on this blog
 date: 2025-04-27
 ---
 
