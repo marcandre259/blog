@@ -23,9 +23,21 @@ Think of an exam you took for example, you may start with some questions like:
 - How does the distribution of score look like, was the exam a pass or fail
   ordeal, or was there a mass of students who barely passed or failed?
 
-In a complete analysis, you'd want a clear and explicit to those questions that
-you find important. That means computing the quantile, or the mean, some
-proportions, etc.. The point of plots like the histogram or the KDE, is to give you an overview of the story. Yes, maybe the mean is what interests you, but isn't nice to know that while you were better than average, you still performed worse than 50% of the class? That's the kind of early hypotheses or insights plots provide.
+In a complete analysis, you'd want clear and explicit answers to questions that
+are important. That means computing stuff such as the quantile, or the mean,
+some proportions, etc..
+
+The point of plots like the histogram or the KDE, is to give you an overview of
+the story. Doing this, you gain perspective about context and new hypotheses.
+Yes, maybe the mean is what interests you, but isn't nice to know that while you
+were better than average, you still performed worse than 50% of the class?
+That's the kind of early hypotheses or insights plots provide.
+
+### Understanding histograms and KDE's
+
+## C and Python prerequisites
+
+
 
 
 TODO: What is the density of random value?
