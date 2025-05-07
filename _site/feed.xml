@@ -1,28 +1,48 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-05-07T13:59:32+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Tapestry of flimsy steps</title><author><name>Marc-André Chénier</name></author><entry><title type="html">Intégrer la recherche web à Claude Desktop sur Linux Mint</title><link href="http://localhost:4000/2025/05/07/claude-mcp.html" rel="alternate" type="text/html" title="Intégrer la recherche web à Claude Desktop sur Linux Mint" /><published>2025-05-07T00:00:00+02:00</published><updated>2025-05-07T00:00:00+02:00</updated><id>http://localhost:4000/2025/05/07/claude-mcp</id><content type="html" xml:base="http://localhost:4000/2025/05/07/claude-mcp.html"><![CDATA[<h1 id="intégrer-la-recherche-web-à-claude-desktop">Intégrer la recherche web à Claude Desktop</h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-05-07T22:03:02+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Tapestry of flimsy steps</title><author><name>Marc-André Chénier</name></author><entry><title type="html">Intégrer la recherche web à Claude Desktop sur Linux Mint</title><link href="http://localhost:4000/2025/05/07/claude-mcp.html" rel="alternate" type="text/html" title="Intégrer la recherche web à Claude Desktop sur Linux Mint" /><published>2025-05-07T00:00:00+02:00</published><updated>2025-05-07T00:00:00+02:00</updated><id>http://localhost:4000/2025/05/07/claude-mcp</id><content type="html" xml:base="http://localhost:4000/2025/05/07/claude-mcp.html"><![CDATA[<h1 id="intégrer-la-recherche-web-à-claude-desktop-sur-linux-mint">Intégrer la recherche web à Claude Desktop sur Linux Mint</h1>
+
+<p>Cet article explique comment ajouter la recherche web à Claude Desktop sur Linux
+en utilisant le protocole MCP (Model Context Protocol), qui permet aux modèles d’IA d’utiliser des outils externes. Cela se fait en trois étapes:</p>
+<ul>
+  <li>L’installation du client Claude Desktop sous Linux</li>
+  <li>La configuration d’un premier serveur MCP donnant au modèle accès aux fichiers locaux. Cela a des fins de familiarisation.</li>
+  <li>La configuration d’un serveur comprenant les fonctionnalités de recherche web.</li>
+</ul>
+
+<p>L’objectif est de permettre au modèle de repondre a des questions avec des informations actuellement disponible en ligne.</p>
+
+<ul>
+  <li><a href="#intégrer-la-recherche-web-à-claude-desktop-sur-linux-mint">Intégrer la recherche web à Claude Desktop sur Linux Mint</a>
+    <ul>
+      <li><a href="#installation-de-claude-desktop-sur-linux">Installation de Claude Desktop sur Linux</a></li>
+      <li><a href="#configurer-un-premier-serveur-mcp">Configurer un premier serveur MCP</a></li>
+      <li><a href="#ajouter-le-serveur-brave-search-pour-la-recherche-brave">Ajouter le serveur brave-search pour la recherche brave</a></li>
+    </ul>
+  </li>
+</ul>
 
 <h2 id="installation-de-claude-desktop-sur-linux">Installation de Claude Desktop sur Linux</h2>
 <p>Dans ce tutoriel, j’installe <a href="https://claude.ai/download">Claude Desktop</a> sur
 une instance de Linux Mint 22.1. Linux Mint est une distribution Linux assez
-populaire basee sur Debian.</p>
+populaire basée sur Debian.</p>
 
-<p>Il n’y a presentement pas de version officielle de Claude Desktop disponible
-pour Linux. L’alternative que j’ai trouve est ce project sur <em>github</em>:
+<p>Il n’y a présentement pas de version officielle de Claude Desktop disponible
+pour Linux. L’alternative que j’ai trouvée est ce projet sur <em>github</em>:
 <a href="https://github.com/aaddrick/claude-desktop-debian">claude-desktop-debian</a>.
 C’est une adaptation de la version Windows et elle est compatible avec
-le protocol MCP. Le protocol MCP permet au client Claude d’acceder a des
+le protocole MCP. Le protocole MCP permet au client Claude d’accéder à des
 outils incluant la recherche web que je vais configurer.</p>
 
 <p><img src="/assets/claude_mcp/claude_desktop_linux.png" alt="Alt" /></p>
 
-<p>Pour faire l’installation de cette adaptation du client Claude, il faut
-avoir acces au programme en ligne de commande <em>git</em>. Pour installer <em>git</em>, il suffit de taper</p>
+<p>Pour installer cette adaptation du client Claude, il faut
+avoir accès au programme en ligne de commande <em>git</em>. Pour installer <em>git</em>, il suffit de taper</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt get <span class="nb">install </span>git
 </code></pre></div></div>
-<p>dans son terminal (en sachant inclure l’access administratif <em>sudo</em> si necessaire).</p>
+<p>dans son terminal (en incluant l’accès administratif <em>sudo</em> si nécessaire).</p>
 
-<p>Ensuite, il faut cloner le depot git de <a href="">claude-desktop-debian</a>, puis lancer
-le <em>build</em> script pour generer un paquet <em>.deb</em>. Pour ce faire, j’execute cette
-commande dans mon repertoire <em>~/Documents/</em>:</p>
+<p>Ensuite, il faut cloner le dépôt git de <a href="">claude-desktop-debian</a>, puis lancer
+le <em>build</em> script pour générer un paquet <em>.deb</em>. Pour ce faire, j’exécute cette
+commande dans mon répertoire <em>~/Documents/</em>:</p>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Clone this repository</span>
 git clone https://github.com/aaddrick/claude-desktop-debian.git
@@ -32,53 +52,53 @@ git clone https://github.com/aaddrick/claude-desktop-debian.git
 ./build.sh
 </code></pre></div></div>
 
-<p>Le <em>build</em> script est bien foutu et s’occupe d’installer les depedences
-necessaires avant l’installation du client Claude lui-meme. Ce processus prend
-quelques minutes, assez pour se preparer un cafe.</p>
+<p>Le <em>build</em> script est bien fait et s’occupe d’installer les dépendances
+nécessaires avant l’installation du client Claude lui-même. Ce processus prend
+quelques minutes, assez pour se préparer un café.</p>
 
-<p>Le <em>build</em> va generer un fichier semblable a
-<em>claude-desktop_{version_number}_{architecture}.deb</em> dans le repertoire
+<p>Le <em>build</em> va générer un fichier semblable à
+<em>claude-desktop_{version_number}_{architecture}.deb</em> dans le répertoire
 <em>claude-desktop-debian</em>. Dans mon cas, le fichier <em>.deb</em> est
-<em>claude-desktop_0.9.3_amd64.deb</em>. Pour installer le paquet, je commence par executer</p>
+<em>claude-desktop_0.9.3_amd64.deb</em>. Pour installer le paquet, je commence par exécuter</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">chmod</span> +x claude-desktop_0.9.3_amd64.deb
 </code></pre></div></div>
-<p>ce qui fait du paquet un fichier executable. Ensuite, j’installe le paquet avec la commande</p>
+<p>ce qui fait du paquet un fichier exécutable. Ensuite, j’installe le paquet avec la commande</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt get <span class="nb">install </span>claude-desktop_0.9.3_amd64.deb
 </code></pre></div></div>
 
-<p>Une fois l’installation completer, le client Claude devrait pouvoir etre lancer a partir du terminal avec</p>
+<p>Une fois l’installation complétée, le client Claude devrait pouvoir être lancé à partir du terminal avec</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>claude-desktop
 </code></pre></div></div>
-<p>Pour tester, je m’identifie dans l’application avec mon compte google et j’envois une petite requete comme <em>Hello</em> dans le menu de discussion.</p>
+<p>Pour tester, je m’identifie dans l’application avec mon compte google et j’envoie une petite requête comme <em>Hello</em> dans le menu de discussion.</p>
 
 <h2 id="configurer-un-premier-serveur-mcp">Configurer un premier serveur MCP</h2>
 <p>Au lancement, le client Claude Desktop analyse le fichier
-<em>~/.config/Claude/claude_desktop_config.json</em> pour decouvrir d’eventuels outils.
-Lorsque decouverts, ces outils peuvent etre utiliser par le Large Language Model
-(LLM) pour repondre aux requetes de l’utilisateurs.</p>
+<em>~/.config/Claude/claude_desktop_config.json</em> pour découvrir d’éventuels outils.
+Lorsque découverts, ces outils peuvent être utilisés par le Large Language Model
+(LLM) pour répondre aux requêtes de l’utilisateur.</p>
 
-<p>Par example, un outil meteo permet au LLM de consulter la meteo sur internet.
-Pour s’assurer que ces outils sont bien utilises, il faut etre suffisemment explicite
-dans la formulation de ses requetes. Par exemple, demander <em>Utilise l’outil
-meteo pour donner la meteo d’aujourd’hui</em> a la place de <em>Donne la meteo
+<p>Par exemple, un outil météo permet au LLM de consulter la météo sur internet.
+Pour s’assurer que ces outils sont bien utilisés, il faut être suffisamment explicite
+dans la formulation de ses requêtes. Par exemple, demander <em>Utilise l’outil
+météo pour donner la météo d’aujourd’hui</em> à la place de <em>Donne la météo
 d’aujourd’hui</em>. Dans le second cas, le LLM a moins de chance de consulter
-l’outil et va alors donner une reponse comme: <em>mon contexte ne me donne pas
-acces aux informations quotidiennes de meteo</em>.</p>
+l’outil et va alors donner une réponse comme: <em>mon contexte ne me donne pas
+accès aux informations quotidiennes de météo</em>.</p>
 
-<p>Initiallement, le fichier <em>claude_desktop_config.json</em> n’existera probablement
-pas, donc il va falloir le creer avec:</p>
+<p>Initialement, le fichier <em>claude_desktop_config.json</em> n’existera probablement
+pas, donc il va falloir le créer avec:</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/.config/Claude/claude_desktop_config.json
 </code></pre></div></div>
 
 <p>Pour se familiariser avec la configuration des serveurs MCP, je recommande de
 configurer le serveur <em>filesystem</em>. Le serveur <em>filesystem</em> comporte des outils
-permettant de lire, creer et modifier des fichiers sur votre systeme local. Le
+permettant de lire, créer et modifier des fichiers sur votre système local. Le
 client Claude va toujours demander la permission avant d’utiliser un outil et il
-est necessaire de lire ces demandes de permission pour eviter des gros soucis.</p>
+est nécessaire de lire ces demandes de permission pour éviter des gros soucis.</p>
 
-<p>Cette partie du tutoriel est tiree de
+<p>Cette partie du tutoriel est tirée de
 <a href="https://modelcontextprotocol.io/quickstart/user">MCP-Quickstart</a>. Il suffit
-alors de copier colle le texte suivant dans le fichier
+alors de copier coller le texte suivant dans le fichier
 <em>claude_desktop_config.json</em></p>
 
 <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
@@ -98,7 +118,7 @@ alors de copier colle le texte suivant dans le fichier
 
 <p>Les arguments <em>/Users/username/Desktop/</em> et <em>/Users/username/Downloads/</em> fournissent
 les portes d’acces que peut utiliser le LLM pour chercher et modifier nos
-fichiers. Ils doivent donc etre adapter autant que necessaire. Dans mon cas,
+fichiers. Ils doivent donc être adapter autant que nécessaire. Dans mon cas,
 j’ai la configuration suivante:</p>
 
 <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
@@ -115,11 +135,11 @@ j’ai la configuration suivante:</p>
 </span><span class="p">}</span><span class="w">
 </span></code></pre></div></div>
 
-<p>Ce texte de configuration etant inclue au fichier <em>claude_desktop_config.json</em>,
-il faut s’assurer d’avoir la dependence <em>node js</em> sur votre systeme. Cela est
-necessaire pour l’installation et le lancement des serveur MCP utilisant la
-commande <em>npx</em>. Pour un distro de type Debian comme Linux Mint, le plus simple
-est d’executer ce <a href="https://nodejs.org/en/download">script</a> dans son terminal:</p>
+<p>Ce texte de configuration étant inclut au fichier <em>claude_desktop_config.json</em>,
+il faut s’assurer d’avoir la dépendance <em>node js</em> sur votre système. Cela est
+nécessaire pour l’installation et le lancement des serveurs MCP utilisant la
+commande <em>npx</em>. Pour une distribution de type Debian comme Linux Mint, le plus simple
+est d’exécuter ce <a href="https://nodejs.org/en/download">script</a> dans son terminal:</p>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Download and install nvm:</span>
 curl <span class="nt">-o-</span> https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
@@ -138,113 +158,86 @@ nvm current <span class="c"># Should print "v22.15.0".</span>
 npm <span class="nt">-v</span> <span class="c"># Should print "10.9.2".</span>
 </code></pre></div></div>
 
-<p>Cela fait, je ferme et reouvre Claude Desktop en executant</p>
+<p>Une fois cela fait, je ferme et réouvre Claude Desktop en exécutant</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>claude-desktop
 </code></pre></div></div>
 
 <p>Je peux alors tester le serveur filesystem en demandant <em>What folders are in my
-Documents</em>, et apres avec donner les permissions demander, j’obtient la reponse:
+Documents</em>, et après avoir donné les permissions demandées, j’obtiens la réponse:
 *There’s one folder in your Documents directory called “claude-desktop-debian”.</p>
 
 <h2 id="ajouter-le-serveur-brave-search-pour-la-recherche-brave">Ajouter le serveur brave-search pour la recherche brave</h2>
-<p>Ce test etant reussie. On peut maintenant passer au moteur de recherche. Pour la recherche j’utilise le serveur brave-search etant donne que son installation et utilisation est relativement simple. Il utilise aussi la meme dependence node js.</p>
+<p>Ce test étant réussi. On peut maintenant passer au moteur de recherche. Pour la
+recherche j’utilise le serveur brave-search étant donné que son installation et
+utilisation est relativement simple. Il utilise aussi la même dépendance <em>node
+js</em>.</p>
 
-<p>La premiere etape est de generer une cle api sur le site web de Brave.
-Pour ce faire, il faut creer un compte utilisateur sur brave search api.
-Par la suite, le menu API keys permet</p>
+<p>La première étape consiste à générer une clé API sur le site web de Brave. Pour
+ce faire, un compte utilisateur est créé sur brave search api. Par la suite, le
+bouton <em>Add API key</em> du menu API keys permet d’ajouter une clé API au compte.</p>
 
-<p>Apres avoir inserer la cle et editer la config, consulter un json validator checker (faites attentions de ne pas inclure toute la cle api) sur internet pour verifier que le fichier config n’a pas derreur de syntaxes.</p>
+<p><img src="/assets/claude_mcp/api_key_brave_search.png" alt="Alt" /></p>
 
-<p>Cela fait, on ferme et reouvre claude-desktop une nouvelle fois. Je pose maintenant cette question
-“Search online what is the weather today”</p>
+<p>Celle-ci est ensuite ajoutée au fichier de configuration
+<em>claude_desktop_config.json</em>. Le format attendu pour la configuration est donne
+sur ce projet <a href="https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search">github</a>.</p>
 
-<p>Si la configuration est correcte, le client Claude va demander d’utiliser l’outil brave_web_search avant de donner une reponse plus ou moins valide.</p>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"brave-search"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"npx"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"-y"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"@modelcontextprotocol/server-brave-search"</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"BRAVE_API_KEY"</span><span class="p">:</span><span class="w"> </span><span class="s2">"YOUR_API_KEY_HERE"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
 
-<h2 id="notes">Notes</h2>
-<ul>
-  <li>Environmment d’installation</li>
-</ul>
+<p>Pour préserver les outils <em>filesystem</em>, il faut adjoindre cette configuration à
+celle donnée ci-dessous. Je donne un exemple pertinent au bas de ce tutoriel.</p>
 
-<p>Linux mint 22.1</p>
+<p>Après avoir inséré la clé et édité la configuration, je consulte un validateur json
+sur internet pour vérifier que le fichier config n’a pas
+d’erreur de syntaxe. En faisant cela, je m’assure de ne pas inclure une clé API
+valide dans le texte vérifié.</p>
 
-<p>Premier defis est qu’il n’y pas de version officiel de Claude Desktop pour les distributions Linux.</p>
+<p>Une fois cela fait, on ferme et réouvre <em>claude-desktop</em> une nouvelle fois. Je
+pose maintenant cette question “Search online what is the weather today”. Si la
+configuration est correcte, le client Claude va demander d’utiliser l’outil
+brave_web_search avant de donner une réponse plus ou moins valide.</p>
 
-<p>On va donc installer une version austentivement windows.</p>
+<p><img src="/assets/claude_mcp/weather_today.png" alt="Alt" /></p>
 
-<p>Le project est aaddrick/claude-desktop-debian</p>
+<p>Si cela fonctionne, félicitations! Dans le cas contraire, voici un exemple pour référence:</p>
 
-<p>Le project supporte l’acces aux outils MCP, super!</p>
-
-<p>Necessaire d’installer git</p>
-
-<p>Doit suivre les instructions d’installation pour une distribution de type Debian.</p>
-
-<p>Dans mon cas: la version et l’architecture donne claude-desktop_0.9.3_amd64.deb.</p>
-
-<p>Ne pas oublier donner les permissions executables au fichier .deb avec <code class="language-plaintext highlighter-rouge">chmod +x</code>. Autrement, erreur.</p>
-
-<p>Instructions sur le project git, decider d’utiliser sudo apt install directement sur le fichier .deb.</p>
-
-<p>Ensuite claude-desktop peut-etre lancer avec claude desktop a partir du terminal</p>
-
-<p>Apres s’etre enregistrer avec mon compte google, je peux faire un test rapide: j’ecris Hello dans la boite de conversation et je recois “Hello! How can I help you today?” de Claude Dekstop.</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt <span class="nb">install </span>git
-</code></pre></div></div>
-
-<p>si ce n’est pas deja le cas.</p>
-
-<p>L’installation des dependences prend quelques minutes. Assez de temps pour se faire un cafe sur un distro nouvellement installe.</p>
-
-<p>Le fichier de configuration, ou les serveurs MCP sont declarer est:</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/.config/Claude/claude_desktop_config.json
-</code></pre></div></div>
-
-<p>Pour la configuration, j’installe mon editeur de texte prefere: neovim</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo apt install neovim
-</code></pre></div></div>
-
-<p>C’est possible de creer le fichier claude_desktop_config.json avec l’ui en allant dans Files-&gt;Settings-&gt;Developer et en cliquant sur le bouton “Edit Config”. On peut aussi tres bien le creer soit meme avec, par exemple,</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>touch ~/.config/Claude/claude_desktop_config.json
-</code></pre></div></div>
-<p>C’est un fichier vierge de toute facon, que le client Claude consulte pour decouvrir d’eventuels serveurs MCP.</p>
-
-<p>Avant de mettre en place l’outil moteur de recherche, le plus facile est de suivre le tutoriel d’Anthropic pour installer le server-filesystem. C’est un ensemble d’outil permettant au LLM de lire, creer et modifier des fichiers sur notre ordinateur (rester bien prudent).</p>
-
-<p>Faut etre sur de donner le chemin d’acces a nos repertoires.</p>
-
-<p>Pour le test, je donne access a /Home/marc/Documents et /Home/marc/Downloads. Le LLM va alors savoir les utiliser pour acceder a vos fichiers.</p>
-
-<p>Le serveur exige la dependence node js. Pour un distro de type Debian comme Mint, on peut simplement copier et coller le script Download Node.js sur nodejs.org/en/download dans son terminal.</p>
-
-<p>Cela fait, quitter l’application claude desktop (en faisant ctrl-c dans le terminal par exemple) et relancer la.</p>
-
-<p>Maintenant je demande a Claude, What folders are in my Documents, et apres avec
-donner les permissions demander, j’botaient la reponse: There’s one folder in
-your Documents directory called “claude-desktop-debian”. Voila, notre LLM a
-decouvert l’origine de sa propre existence.</p>
-
-<p>Ce test etant reussie. On peut maintenant passer au moteur de recherche. Pour la recherche j’utilise le serveur brave-search etant donne que son installation et utilisation est relativement simple. Il utilise aussi la meme dependence node js.</p>
-
-<p>La premiere etape est de generer une cle api sur le site web de Brave.
-Pour ce faire, il faut creer un compte utilisateur sur brave search api.</p>
-
-<p>Apres avoir inserer la cle et editer la config, consulter un json validator checker (faites attentions de ne pas inclure toute la cle api) sur internet pour verifier que le fichier config n’a pas derreur de syntaxes.</p>
-
-<p>Cela fait, on ferme et reouvre claude-desktop une nouvelle fois. Je pose maintenant cette question
-“Search online what is the weather today”</p>
-
-<p>Si la configuration est correcte, le client Claude va demander d’utiliser l’outil brave_web_search avant de donner une reponse plus ou moins valide.</p>
-
-<ul>
-  <li>Claude Desktop -&gt; abonnement ou non</li>
-  <li>Protocole MCP</li>
-  <li>Brave search set-up</li>
-  <li>Test du serveur mcp</li>
-  <li>Configuration</li>
-  <li>Example</li>
-</ul>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Intégrer la recherche web à Claude Desktop]]></summary></entry><entry><title type="html">Getting maths to render on this blog</title><link href="http://localhost:4000/2025/04/27/math-syntax.html" rel="alternate" type="text/html" title="Getting maths to render on this blog" /><published>2025-04-27T00:00:00+02:00</published><updated>2025-04-27T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/27/math-syntax</id><content type="html" xml:base="http://localhost:4000/2025/04/27/math-syntax.html"><![CDATA[<h1 id="going-insane-trying-to-get-math-to-render-on-this-blog">Going insane trying to get math to render on this blog</h1>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"filesystem"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"npx"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"-y"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"@modelcontextprotocol/server-filesystem"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"/Users/marc/"</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"brave-search"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"npx"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"-y"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"@modelcontextprotocol/server-brave-search"</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"BRAVE_API_KEY"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BSA7Krtfakekey"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Intégrer la recherche web à Claude Desktop sur Linux Mint]]></summary></entry><entry><title type="html">Getting maths to render on this blog</title><link href="http://localhost:4000/2025/04/27/math-syntax.html" rel="alternate" type="text/html" title="Getting maths to render on this blog" /><published>2025-04-27T00:00:00+02:00</published><updated>2025-04-27T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/27/math-syntax</id><content type="html" xml:base="http://localhost:4000/2025/04/27/math-syntax.html"><![CDATA[<h1 id="going-insane-trying-to-get-math-to-render-on-this-blog">Going insane trying to get math to render on this blog</h1>
 <p>I realized last week that mathematical equations would not render when writing
 on this blog. I had a wild ride trying to get this working already, but now the time
 has come to get those equations to render.</p>
