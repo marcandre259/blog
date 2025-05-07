@@ -31,7 +31,7 @@ C'est une adaptation de la version Windows et elle est compatible avec
 le protocole MCP. Le protocole MCP permet au client Claude d'accéder à des
 outils incluant la recherche web que je vais configurer.
 
-![Alt](/assets/claude_mcp/claude_desktop_linux.png)
+![Alt](/blog/assets/claude_mcp/claude_desktop_linux.png)
 
 Pour installer cette adaptation du client Claude, il faut
 avoir accès au programme en ligne de commande *git*. Pour installer *git*, il suffit de taper
@@ -186,7 +186,7 @@ La première étape consiste à générer une clé API sur le site web de Brave.
 ce faire, un compte utilisateur est créé sur brave search api. Par la suite, le
 bouton *Add API key* du menu API keys permet d'ajouter une clé API au compte.
 
-![Alt](/assets/claude_mcp/api_key_brave_search.png)
+![Alt](/blog/assets/claude_mcp/api_key_brave_search.png)
 
 Celle-ci est ensuite ajoutée au fichier de configuration
 *claude_desktop_config.json*. Le format attendu pour la configuration est donne
@@ -222,7 +222,7 @@ pose maintenant cette question "Search online what is the weather today". Si la
 configuration est correcte, le client Claude va demander d'utiliser l'outil
 brave_web_search avant de donner une réponse plus ou moins valide.
 
-![Alt](/assets/claude_mcp/weather_today.png)
+![Alt](/blog/assets/claude_mcp/weather_today.png)
 
 Si cela fonctionne, félicitations! Dans le cas contraire, voici un exemple pour référence:
 
