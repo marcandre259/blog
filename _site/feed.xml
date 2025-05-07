@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-05-07T22:03:02+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Tapestry of flimsy steps</title><author><name>Marc-André Chénier</name></author><entry><title type="html">Intégrer la recherche web à Claude Desktop sur Linux Mint</title><link href="http://localhost:4000/2025/05/07/claude-mcp.html" rel="alternate" type="text/html" title="Intégrer la recherche web à Claude Desktop sur Linux Mint" /><published>2025-05-07T00:00:00+02:00</published><updated>2025-05-07T00:00:00+02:00</updated><id>http://localhost:4000/2025/05/07/claude-mcp</id><content type="html" xml:base="http://localhost:4000/2025/05/07/claude-mcp.html"><![CDATA[<h1 id="intégrer-la-recherche-web-à-claude-desktop-sur-linux-mint">Intégrer la recherche web à Claude Desktop sur Linux Mint</h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/blog/" rel="alternate" type="text/html" /><updated>2025-05-07T22:14:22+02:00</updated><id>http://localhost:4000/blog/feed.xml</id><title type="html">Tapestry of flimsy steps</title><author><name>Marc-André Chénier</name></author><entry><title type="html">Intégrer la recherche web à Claude Desktop sur Linux Mint</title><link href="http://localhost:4000/blog/2025/05/07/claude-mcp.html" rel="alternate" type="text/html" title="Intégrer la recherche web à Claude Desktop sur Linux Mint" /><published>2025-05-07T00:00:00+02:00</published><updated>2025-05-07T00:00:00+02:00</updated><id>http://localhost:4000/blog/2025/05/07/claude-mcp</id><content type="html" xml:base="http://localhost:4000/blog/2025/05/07/claude-mcp.html"><![CDATA[<h1 id="intégrer-la-recherche-web-à-claude-desktop-sur-linux-mint">Intégrer la recherche web à Claude Desktop sur Linux Mint</h1>
 
 <p>Cet article explique comment ajouter la recherche web à Claude Desktop sur Linux
 en utilisant le protocole MCP (Model Context Protocol), qui permet aux modèles d’IA d’utiliser des outils externes. Cela se fait en trois étapes:</p>
@@ -32,7 +32,7 @@ C’est une adaptation de la version Windows et elle est compatible avec
 le protocole MCP. Le protocole MCP permet au client Claude d’accéder à des
 outils incluant la recherche web que je vais configurer.</p>
 
-<p><img src="/assets/claude_mcp/claude_desktop_linux.png" alt="Alt" /></p>
+<p><img src="/blog/assets/claude_mcp/claude_desktop_linux.png" alt="Alt" /></p>
 
 <p>Pour installer cette adaptation du client Claude, il faut
 avoir accès au programme en ligne de commande <em>git</em>. Pour installer <em>git</em>, il suffit de taper</p>
@@ -176,7 +176,7 @@ js</em>.</p>
 ce faire, un compte utilisateur est créé sur brave search api. Par la suite, le
 bouton <em>Add API key</em> du menu API keys permet d’ajouter une clé API au compte.</p>
 
-<p><img src="/assets/claude_mcp/api_key_brave_search.png" alt="Alt" /></p>
+<p><img src="/blog/assets/claude_mcp/api_key_brave_search.png" alt="Alt" /></p>
 
 <p>Celle-ci est ensuite ajoutée au fichier de configuration
 <em>claude_desktop_config.json</em>. Le format attendu pour la configuration est donne
@@ -211,7 +211,7 @@ pose maintenant cette question “Search online what is the weather today”. Si
 configuration est correcte, le client Claude va demander d’utiliser l’outil
 brave_web_search avant de donner une réponse plus ou moins valide.</p>
 
-<p><img src="/assets/claude_mcp/weather_today.png" alt="Alt" /></p>
+<p><img src="/blog/assets/claude_mcp/weather_today.png" alt="Alt" /></p>
 
 <p>Si cela fonctionne, félicitations! Dans le cas contraire, voici un exemple pour référence:</p>
 
@@ -237,7 +237,7 @@ brave_web_search avant de donner une réponse plus ou moins valide.</p>
     </span><span class="p">}</span><span class="w">
   </span><span class="p">}</span><span class="w">
 </span><span class="p">}</span><span class="w">
-</span></code></pre></div></div>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Intégrer la recherche web à Claude Desktop sur Linux Mint]]></summary></entry><entry><title type="html">Getting maths to render on this blog</title><link href="http://localhost:4000/2025/04/27/math-syntax.html" rel="alternate" type="text/html" title="Getting maths to render on this blog" /><published>2025-04-27T00:00:00+02:00</published><updated>2025-04-27T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/27/math-syntax</id><content type="html" xml:base="http://localhost:4000/2025/04/27/math-syntax.html"><![CDATA[<h1 id="going-insane-trying-to-get-math-to-render-on-this-blog">Going insane trying to get math to render on this blog</h1>
+</span></code></pre></div></div>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Intégrer la recherche web à Claude Desktop sur Linux Mint]]></summary></entry><entry><title type="html">Getting maths to render on this blog</title><link href="http://localhost:4000/blog/2025/04/27/math-syntax.html" rel="alternate" type="text/html" title="Getting maths to render on this blog" /><published>2025-04-27T00:00:00+02:00</published><updated>2025-04-27T00:00:00+02:00</updated><id>http://localhost:4000/blog/2025/04/27/math-syntax</id><content type="html" xml:base="http://localhost:4000/blog/2025/04/27/math-syntax.html"><![CDATA[<h1 id="going-insane-trying-to-get-math-to-render-on-this-blog">Going insane trying to get math to render on this blog</h1>
 <p>I realized last week that mathematical equations would not render when writing
 on this blog. I had a wild ride trying to get this working already, but now the time
 has come to get those equations to render.</p>
@@ -344,7 +344,7 @@ like <em>Cursor</em>, except that you can set it up with an API of your choice w
 having to pay a subscription.</p>
 
 <p>On the one hand, I could have spent this sunny afternoon reading jekyll’s and
-github pages documentation at length instead of iterating with an LLM. On the other hand, some blockers are nice to just push aside with <em>vibe-coding</em>.</p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Going insane trying to get math to render on this blog I realized last week that mathematical equations would not render when writing on this blog. I had a wild ride trying to get this working already, but now the time has come to get those equations to render.]]></summary></entry><entry><title type="html">Statistical approach to a 2 by 2 crossover design</title><link href="http://localhost:4000/2025/04/21/crossover-design.html" rel="alternate" type="text/html" title="Statistical approach to a 2 by 2 crossover design" /><published>2025-04-21T00:00:00+02:00</published><updated>2025-04-21T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/21/crossover-design</id><content type="html" xml:base="http://localhost:4000/2025/04/21/crossover-design.html"><![CDATA[<h1 id="statistical-approach-to-a-2-by-2-crossover-design">Statistical approach to a 2 by 2 crossover design</h1>
+github pages documentation at length instead of iterating with an LLM. On the other hand, some blockers are nice to just push aside with <em>vibe-coding</em>.</p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Going insane trying to get math to render on this blog I realized last week that mathematical equations would not render when writing on this blog. I had a wild ride trying to get this working already, but now the time has come to get those equations to render.]]></summary></entry><entry><title type="html">Statistical approach to a 2 by 2 crossover design</title><link href="http://localhost:4000/blog/2025/04/21/crossover-design.html" rel="alternate" type="text/html" title="Statistical approach to a 2 by 2 crossover design" /><published>2025-04-21T00:00:00+02:00</published><updated>2025-04-21T00:00:00+02:00</updated><id>http://localhost:4000/blog/2025/04/21/crossover-design</id><content type="html" xml:base="http://localhost:4000/blog/2025/04/21/crossover-design.html"><![CDATA[<h1 id="statistical-approach-to-a-2-by-2-crossover-design">Statistical approach to a 2 by 2 crossover design</h1>
 <ul>
   <li><a href="#statistical-approach-to-a-2-by-2-crossover-design">Statistical approach to a 2 by 2 crossover design</a>
     <ul>
@@ -537,4 +537,4 @@ explicitly included but allows the identification of the period effect.</p>
 
 <p>A peek at the data structure:</p>
 
-<p><img src="/assets/crossover_data_example.png" alt="Alt" /></p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Statistical approach to a 2 by 2 crossover design Statistical approach to a 2 by 2 crossover design Question Two questions in one What’s a crossover design? Multiple outcomes of interest Tackling the first question Tackling the second question]]></summary></entry><entry><title type="html">Launching this blog</title><link href="http://localhost:4000/2024/09/29/launch.html" rel="alternate" type="text/html" title="Launching this blog" /><published>2024-09-29T00:00:00+02:00</published><updated>2024-09-29T00:00:00+02:00</updated><id>http://localhost:4000/2024/09/29/launch</id><content type="html" xml:base="http://localhost:4000/2024/09/29/launch.html"><![CDATA[<p>This post will probably be removed once the blog gets some steam. Until then, it will be a reminder of its humble beginning.</p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[This post will probably be removed once the blog gets some steam. Until then, it will be a reminder of its humble beginning.]]></summary></entry></feed>
+<p><img src="/blog/assets/crossover_data_example.png" alt="Alt" /></p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Statistical approach to a 2 by 2 crossover design Statistical approach to a 2 by 2 crossover design Question Two questions in one What’s a crossover design? Multiple outcomes of interest Tackling the first question Tackling the second question]]></summary></entry><entry><title type="html">Launching this blog</title><link href="http://localhost:4000/blog/2024/09/29/launch.html" rel="alternate" type="text/html" title="Launching this blog" /><published>2024-09-29T00:00:00+02:00</published><updated>2024-09-29T00:00:00+02:00</updated><id>http://localhost:4000/blog/2024/09/29/launch</id><content type="html" xml:base="http://localhost:4000/blog/2024/09/29/launch.html"><![CDATA[<p>This post will probably be removed once the blog gets some steam. Until then, it will be a reminder of its humble beginning.</p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[This post will probably be removed once the blog gets some steam. Until then, it will be a reminder of its humble beginning.]]></summary></entry></feed>

@@ -193,4 +193,4 @@ explicitly included but allows the identification of the period effect.
 
 A peek at the data structure:
 
-![Alt](/assets/crossover_data_example.png)
+![Alt](/blog/assets/crossover_data_example.png)
