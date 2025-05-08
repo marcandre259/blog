@@ -1,4 +1,39 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-04-28T11:50:56+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Tapestry of flimsy steps</title><author><name>Marc-André Chénier</name></author><entry><title type="html">Getting maths to render on this blog</title><link href="http://localhost:4000/2025/04/27/math-syntax.html" rel="alternate" type="text/html" title="Getting maths to render on this blog" /><published>2025-04-27T00:00:00+02:00</published><updated>2025-04-27T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/27/math-syntax</id><content type="html" xml:base="http://localhost:4000/2025/04/27/math-syntax.html"><![CDATA[<h1 id="going-insane-trying-to-get-math-to-render-on-this-blog">Going insane trying to get math to render on this blog</h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-05-08T00:29:45+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Tapestry of flimsy steps</title><author><name>Marc-André Chénier</name></author><entry><title type="html">A brief C (and Python) adventure in density estimation</title><link href="http://localhost:4000/2025/04/28/c-histogram-adventure.html" rel="alternate" type="text/html" title="A brief C (and Python) adventure in density estimation" /><published>2025-04-28T00:00:00+02:00</published><updated>2025-04-28T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/28/c-histogram-adventure</id><content type="html" xml:base="http://localhost:4000/2025/04/28/c-histogram-adventure.html"><![CDATA[<h1 id="a-brief-c-and-python-adventure-in-density-estimation">A brief C (and Python) adventure in density estimation</h1>
+
+<h2 id="the-histogram-and-the-kernel-density-estimator">The histogram and the kernel density estimator</h2>
+
+<h3 id="motivating-plots">Motivating plots</h3>
+<p>Usually, the histogram is defined by its look or by saying it’s a way to
+plot a continuous sample of data, e.g. some array of numbers [2.0, 4.0, 2.5,
+…]. You could use an histogram to report on exam scores for example. Plots,
+like the histogram and kernel density estimator (kde), are great tools to
+summarize a sample of data while still keeping a lot of information about that
+raw sample.</p>
+
+<p>Think of an exam you took for example, you may start with some questions like:</p>
+<ul>
+  <li>Am I above average?</li>
+  <li>To which bracket of my peers do I belong, the top 20%, the top 50%?</li>
+  <li>What proportion of students failed or passed the exam?</li>
+  <li>How does the distribution of score look like, was the exam a pass or fail
+ordeal, or was there a mass of students who barely passed or failed?</li>
+</ul>
+
+<p>In a complete analysis, you’d want clear and explicit answers to questions that
+are important. That means computing stuff such as the quantile, or the mean,
+some proportions, etc..</p>
+
+<p>The point of plots like the histogram or the KDE, is to give you an overview of
+the story. Doing this, you gain perspective about context and new hypotheses.
+Yes, maybe the mean is what interests you, but isn’t nice to know that while you
+were better than average, you still performed worse than 50% of the class?
+That’s the kind of early hypotheses or insights plots provide.</p>
+
+<h3 id="understanding-histograms-and-kdes">Understanding histograms and KDE’s</h3>
+
+<h2 id="c-and-python-prerequisites">C and Python prerequisites</h2>
+
+<p>TODO: What is the density of random value?</p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[A brief C (and Python) adventure in density estimation]]></summary></entry><entry><title type="html">Getting math to render on this blog</title><link href="http://localhost:4000/2025/04/27/math-syntax.html" rel="alternate" type="text/html" title="Getting math to render on this blog" /><published>2025-04-27T00:00:00+02:00</published><updated>2025-04-27T00:00:00+02:00</updated><id>http://localhost:4000/2025/04/27/math-syntax</id><content type="html" xml:base="http://localhost:4000/2025/04/27/math-syntax.html"><![CDATA[<h1 id="going-insane-trying-to-get-math-to-render-on-this-blog">Going insane trying to get math to render on this blog</h1>
 <p>I realized last week that mathematical equations would not render when writing
 on this blog. I had a wild ride trying to get this working already, but now the time
 has come to get those equations to render.</p>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang=" en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>A brief C (and Python) adventure in density estimation | Tapestry of flimsy steps</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="A brief C (and Python) adventure in density estimation" />
+<meta name="author" content="Marc-André Chénier" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A brief C (and Python) adventure in density estimation" />
+<meta property="og:description" content="A brief C (and Python) adventure in density estimation" />
+<link rel="canonical" href="http://localhost:4000/2025/04/28/c-histogram-adventure.html" />
+<meta property="og:url" content="http://localhost:4000/2025/04/28/c-histogram-adventure.html" />
+<meta property="og:site_name" content="Tapestry of flimsy steps" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-04-28T00:00:00+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="A brief C (and Python) adventure in density estimation" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Marc-André Chénier"},"dateModified":"2025-04-28T00:00:00+02:00","datePublished":"2025-04-28T00:00:00+02:00","description":"A brief C (and Python) adventure in density estimation","headline":"A brief C (and Python) adventure in density estimation","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2025/04/28/c-histogram-adventure.html"},"url":"http://localhost:4000/2025/04/28/c-histogram-adventure.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Tapestry of flimsy steps" /></head>
+
+
+<body>
+
+    <header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Tapestry of flimsy steps</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/">Tapestry of flimsy steps</a></div>
+      </nav></div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+        <div class="wrapper">
+            
+
+<h1 id="a-brief-c-and-python-adventure-in-density-estimation">A brief C (and Python) adventure in density estimation</h1>
+
+<h2 id="the-histogram-and-the-kernel-density-estimator">The histogram and the kernel density estimator</h2>
+
+<h3 id="motivating-plots">Motivating plots</h3>
+<p>Usually, the histogram is defined by its look or by saying it’s a way to
+plot a continuous sample of data, e.g. some array of numbers [2.0, 4.0, 2.5,
+…]. You could use an histogram to report on exam scores for example. Plots,
+like the histogram and kernel density estimator (kde), are great tools to
+summarize a sample of data while still keeping a lot of information about that
+raw sample.</p>
+
+<p>Think of an exam you took for example, you may start with some questions like:</p>
+<ul>
+  <li>Am I above average?</li>
+  <li>To which bracket of my peers do I belong, the top 20%, the top 50%?</li>
+  <li>What proportion of students failed or passed the exam?</li>
+  <li>How does the distribution of score look like, was the exam a pass or fail
+ordeal, or was there a mass of students who barely passed or failed?</li>
+</ul>
+
+<p>In a complete analysis, you’d want clear and explicit answers to questions that
+are important. That means computing stuff such as the quantile, or the mean,
+some proportions, etc..</p>
+
+<p>The point of plots like the histogram or the KDE, is to give you an overview of
+the story. Doing this, you gain perspective about context and new hypotheses.
+Yes, maybe the mean is what interests you, but isn’t nice to know that while you
+were better than average, you still performed worse than 50% of the class?
+That’s the kind of early hypotheses or insights plots provide.</p>
+
+<h3 id="understanding-histograms-and-kdes">Understanding histograms and KDE’s</h3>
+
+<h2 id="c-and-python-prerequisites">C and Python prerequisites</h2>
+
+<p>TODO: What is the density of random value?</p>
+
+
+
+<!-- MathJax script and configuration -->
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ TeX: { equationNumbers: { autoNumber: "all" } } }); </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+    type="text/javascript"></script>
+<!-- End of MathJax script and configuration -->
+        </div>
+    </main>
+
+    <footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Tapestry of flimsy steps</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Marc-André Chénier</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+</body>
+
+</html>
