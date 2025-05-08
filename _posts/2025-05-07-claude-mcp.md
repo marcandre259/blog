@@ -9,7 +9,7 @@ date: 2025-05-07
 Cet article explique comment ajouter la recherche web à Claude Desktop sur Linux
 en utilisant le protocole MCP (Model Context Protocol), qui permet aux modèles d'IA d'utiliser des outils externes. Cela se fait en trois étapes:
 - L'installation du client Claude Desktop sous Linux
-- La configuration d'un premier serveur MCP donnant au modèle accès aux fichiers locaux. Cela a des fins de familiarisation.
+- La configuration d'un premier serveur MCP donnant au modèle accès aux fichiers locaux. Cela à des fins de familiarisation.
 - La configuration d'un serveur comprenant les fonctionnalités de recherche web.
 
 L'objectif est de permettre au modèle de repondre a des questions avec des informations actuellement disponible en ligne.
@@ -93,7 +93,7 @@ accès aux informations quotidiennes de météo*.
 Initialement, le fichier *claude_desktop_config.json* n'existera probablement
 pas, donc il va falloir le créer avec:
 ```bash
-~/.config/Claude/claude_desktop_config.json
+touch ~/.config/Claude/claude_desktop_config.json
 ```
 
 Pour se familiariser avec la configuration des serveurs MCP, je recommande de
