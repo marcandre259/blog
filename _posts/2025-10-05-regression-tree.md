@@ -3,14 +3,6 @@ title: Regression tree algorithm van niets in C
 date: 2025-10-05
 ---
 
-## Wat over te hebben 
-- Algemene motivatie
-- Bestudeerde concepten                                                                 
-- Ingrediënten: Node, RegressionTree etc. 
-- Volgorde 
-- Achtergrond voor elke stap 
-- Conclusie: toevoegingen e.g. histogram voor efficiëntie, gbm en random forest, pruning, plotten... 
-
 ## Motivatie
 In deze blogpost beschrijf ik een basaal regression tree algorithm in C. Regression en decision trees zijn vandaag overal te vinden in het machine learning landschap. Nog in 2025 en ondanks het optreden van pre-trained one-shot transformer models, zijn gradient boosting machines (GBM) vaak de beste methoden om goede voorspellingen te maken (zie bvb. W. Rizkallah, Journal of Big Data, 2025). Ook in de industrie kom ik vaak algorithmen tegen zoals LightGBM die variaties zijn op de beroemde GBM. 
 
@@ -21,7 +13,7 @@ Het verschil tussen regression en decision zit in de uitkomst die de analist pro
 In wezen gebruiken beide trees dezelfde fit strategie. In een gedefinieerd aantal stappen, delen zij een data sample in een aantal bladjes (leaves) zodat het verschil tussen enige bladjeswaarden en de gerelateerde uitkomsten het kleinste verschil hebben. Nu, als je gewoon het verschil tussen uitkomsten en sample bladjes wilt verminderen, zou je het beste een bladje per datum definiëren. Dan heeft het tree model geen generaliserend vermogen. Dus moeten er concessies gedaan worden in de richting van generalisatie. Doorgaans gebeurt dit door het zetten van parameters zoals het minimum aantal data per bladje, de maximale diepte van de tree of de minimale gain die toegestaan is. 
 
 ## Structuur
-De bedoeling achter deze post is dat jij zelf kunt leren hoe regression trees werken door het algorithm zelf in C te schrijven. Dus ga ik de functie signatures zonder invulling geven, zodat je ze zelf kunt invullen. Volgens mij is dat een plezante manier om iets te leren. Daarna ga ik de ingevulde functies geven. Ik ben zelf zeker geen C expert, dus let op want er gaan memory leaks in de code zijn.
+De bedoeling achter deze post is dat jij zelf kunt leren hoe regression trees werken door het algorithm zelf in C te schrijven. Dus ga ik de functie geven zonder hen samen te stellen, zodat je het programma zelf kunt invullen. Volgens mij is dat een plezante manier om iets te leren. Ik ben zelf zeker geen C expert, dus let op want er gaan memory leaks in de code zijn.
 
 Ik ga proberen de intuïtie en de logica achter elke code snippet door te geven. Tot een zekere hoogte.
 
