@@ -1,6 +1,6 @@
 ---
 layout: math
-title: Regression tree algorithm van niets in C 
+title: Regression tree algorithm van niets in C
 date: 2025-10-09
 ---
 
