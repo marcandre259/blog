@@ -1,6 +1,7 @@
 ---
+layout: math
 title: Regression tree algorithm van niets in C 
-date: 2025-10-05
+date: 2025-10-09
 ---
 
 ## Motivatie
@@ -10,14 +11,14 @@ Van alle onderdelen die deel uitmaken van GBM's en hun verschillende implementat
 
 Het verschil tussen regression en decision zit in de uitkomst die de analist probeert te voorspellen. Is de uitkomst discreet: ja of nee, met twee of meer categorieën, dan heb je met een decision tree te maken. Is de uitkomst continu, huisprijzen bijvoorbeeld, dan heb je met een regression tree te maken. 
 
-In wezen gebruiken beide trees dezelfde fit strategie. In een gedefinieerd aantal stappen, delen zij een data sample in een aantal bladjes (leaves) zodat het verschil tussen enige bladjeswaarden en de gerelateerde uitkomsten het kleinste verschil hebben. Nu, als je gewoon het verschil tussen uitkomsten en sample bladjes wilt verminderen, zou je het beste een bladje per datum definiëren. Dan heeft het tree model geen generaliserend vermogen. Dus moeten er concessies gedaan worden in de richting van generalisatie. Doorgaans gebeurt dit door het zetten van parameters zoals het minimum aantal data per bladje, de maximale diepte van de tree of de minimale gain die toegestaan is. 
+In wezen gebruiken beide trees dezelfde fit strategie. In een gedefinieerd aantal stappen, delen zij een data sample in een aantal bladjes (leaves) zodat het verschil tussen elke bladjeswaarden en zijn gerelateerde uitkomsten het kleinste  is. Nu, als je gewoon het verschil tussen uitkomsten en sample bladjes wilt verminderen, zou je het beste vinden om een bladje per datum te definiëren. Maar dan heeft het tree model geen generaliserend vermogen. Dus moeten er concessies gedaan worden in de richting van generalisatie. Dit gebeurt door het zetten van parameters zoals het minimum aantal data per bladje, de maximale diepte van de tree of de minimale gain die toegestaan is. 
 
 ## Structuur
-De bedoeling achter deze post is dat jij zelf kunt leren hoe regression trees werken door het algorithm zelf in C te schrijven. Dus ga ik de functie geven zonder hen samen te stellen, zodat je het programma zelf kunt invullen. Volgens mij is dat een plezante manier om iets te leren. Ik ben zelf zeker geen C expert, dus let op want er gaan memory leaks in de code zijn.
+De bedoeling achter deze post is dat jij zelf kunt leren hoe regression trees werken door het algorithm zelf in C te schrijven. Dus ga ik de nodige functies geven zonder hen samen te zetten. Volgens mij is dat een plezante manier om iets te leren. Ik ben zelf zeker geen C expert, dus let op want er gaan memory leaks in de code zijn. Ik geef hellemal geen andact aan de leaks. Dit is zeker geen code dat klaar voor productie is.
 
 Ik ga proberen de intuïtie en de logica achter elke code snippet door te geven. Tot een zekere hoogte.
 
-De focus blijft op de implementatie en niet op de intuïtie, dus raad ik deze aan die meer intuïtie nodig hebben om het te vinden op [scikit-learn](https://scikit-learn.org/stable/auto_examples/tree/plot_tree_regression.html#sphx-glr-auto-examples-tree-plot-tree-regression-py).
+De focus blijft op de implementatie en niet op de intuïtie, dus raad ik aan die die meer intuïtie nodig hebben om het te vinden op [scikit-learn](https://scikit-learn.org/stable/auto_examples/tree/plot_tree_regression.html#sphx-glr-auto-examples-tree-plot-tree-regression-py).
 
 ## Nuttige concepten
 De implementatie gebruikt een mooi aantal concepten die komen van programmatie en statistiek domeinen.
@@ -26,13 +27,13 @@ Om de beste splits tussen bladjes te vinden moet de data gesorteerd worden volge
 
 Om te kunnen beslissen of een split bevorderlijk is, gebruiken we zogenoemde gradients, hessians en een gain formule. In dit geval, zijn de gradients min of meer gecentreerde uitkomsten, en de hessians zijn unit vectors.
 
-Recursie gaat vaak gebruikt worden. De tree zelf is gebouwd door een recursief algorithm. Om de gefitte trees te kunnen gebruiken om voorspellingen te doen moet je ze ook met recursie doorkruisen. Tree traversal is ook gebruikt om de feature importance te berekenen. Men kan zeggen dat een regression tree een weg geeft aan elk datum, en dat die weg gevolgd moet worden door recursie. Dus recursie gaat hierbeneden een heel belangrijke rol spelen.
+Recursie gaat vaak gebruikt worden. De tree zelf is gebouwd door een recursief algorithm. Om de gefitte trees te kunnen gebruiken om voorspellingen te doen moet je ze ook met recursie doorkruisen. Tree traversal is ook gebruikt om de feature importance te berekenen. Men kan zeggen dat een regression tree een weg geeft aan elk observatie (of instancie in machine learning taal...), en dat die weg gevolgd moet worden door recursie. Dus recursie gaat hierbeneden een heel belangrijke rol spelen.
 
 Om het algorithm te kunnen testen, gebruik ik ook de simpele random number generator (RNG) van de C standard library. Data simulatie is dus ook een aanwezig concept.
 
 Daarna zijn er een aantal dingen die geassocieerd zijn met het gebruik van C. Namelijk: pointers en memory addresses, stack en heap, struct's en data types. Ik heb enkel een praktisch begrip van die concepten en ga ze vandaar zonder diepte proberen uit te leggen. Het belangrijkste daar is te weten dat een dynamische array in C een pointer is naar het eerste memory address van de array's data. De analist moet dus altijd goed bijhouden hoe lang die array is. Anders krijg jij rommel. 
 
-Ook belangrijk voor recursieve functies is een groot verschil tussen data die zit op de stack en data die zit op de heap. Data op de stack wordt verwijderd zodra het buiten de huidige scope van het programma zit. Data op de heap is het tegenovergestelde. Het wordt bijgehouden tot het vrijgelaten wordt door de analist. Dus heap data kan veranderd worden in een functie en die veranderde data kan binnen de scope van een tweede functie gebruikt worden. Dat is vaak nodig met recursie.
+Ook belangrijk voor recursieve functies is het verschil tussen data die zit op de stack en data die zit op de heap. Data op de stack wordt verwijderd zodra het buiten de huidige scope van het programma zit. Data op de heap is het tegenovergestelde. Het wordt bijgehouden tot het vrijgelaten wordt door de analist. Dus heap data kan veranderd worden in een functie en die veranderde data kan binnen de scope van een tweede functie gebruikt worden. Dat is vaak nodig met recursie.
 
 ## Ingrediënten
 
@@ -45,11 +46,11 @@ typedef struct SplitInfo {
 } SplitInfo;
 ```
 
-Die SplitInfo struct moet gegevens over de beste split van elke feature behouden. Elke split heeft een threshold, waardoor observaties wiens waarde op die feature kleiner is dan de threshold naar de zogenoemde left split gegeven worden, en de rest naar de right split. 
+Die SplitInfo struct moet gegevens over de beste split van elke feature behouden. Elke split heeft een threshold, waardoor observaties wiens waarde op die feature kleiner is dan de threshold naar de zogenoemde left children node gegeven worden, en de rest naar de right children node. 
 
 De gain wordt behouden om twee redenen. Ten eerste om de beste split van verschillende features te kunnen vergelijken. Ten tweede kan elke split gain gebruikt worden om feature importance te berekenen.
 
-De tree zelf is een verzameling van gerelateerde nodes. Elke node heeft een diepte. Op diepte nul vindt men de root node die de hele dataset bevat. Op diepte één is deze root node gedeeld in twee nodes. Elk deel kreeg zijn eigen observaties. Dan worden elk van die twee nodes op diepte één nogmaals in twee gedeeld enzovoort. Op de laatste diepte zitten de bladjes. Die nodes geven voorspellingen op basis van de voorafgaande splitsingen. De regression tree is eigenlijk een binary tree.
+De tree zelf is een verzameling van gerelateerde nodes. Elke node heeft een diepte. Op diepte nul vindt men de root node die de hele dataset bevat. Op diepte één is deze root node gedeeld in twee children nodes. Elk deel kreeg zijn eigen observaties. Dan worden elk van die twee nodes op diepte één nogmaals in twee gedeeld enzovoort. Op de laatste diepte zitten de bladjes. Die nodes geven voorspellingen op basis van de voorafgaande splitsingen. De regression tree is eigenlijk een binary tree.
 
 Elke node is dus zo gedefinieerd:
 
@@ -66,7 +67,7 @@ typedef struct Node {
 } Node;
 ```
 
-De left en right Node's zijn pointers naar children nodes. Omdat elke Node zijn eigen kinderen omvat kan men zeggen dat het een recursief object is. Daarom gebruik ik pointers voor de left en right. Anders zou een Node een oneindig aantal kinderen en klein-kinderen nodes hebben.
+De left en right Node's zijn pointers naar children nodes. Omdat elke Node zijn eigen kinderen omvat kan men zeggen dat het een recursief object is. Daarom gebruik ik pointers voor de left en right nodes. Anders zou een Node object een oneindig aantal kinderen en klein-kinderen nodes hebben.
 
 Een Node heeft ook een feature_id en een threshold, om te behouden op welke feature en op welke waarde de data gesplitst was. Om te weten of de tree groot genoeg is, behoud ik ook de depth van de node. 
 
@@ -84,7 +85,7 @@ typedef struct RegressionTree {
 } RegressionTree;
 ```
 
-De tree bevat de root node, twee complexiteit beperkingen en een constante. Van de root node kan je de hele tree doorkruisen. De complexiteit beperkingen zijn gebruikt om iets toe te geven aan generaliteit. In het kort omdat ik voorspellingen op nieuwe data wil kunnen doen met het model. 
+De tree bevat de root node, twee complexiteit beperkingen en een constante. Vanaf de root node kan je de hele tree doorkruisen. De complexiteit beperkingen zijn gebruikt om iets toe te geven aan generaliteit. In het kort omdat ik voorspellingen op nieuwe data wil kunnen doen met het model. 
 
 De constante is het gemiddelde van de uitkomst waarden. Door de uitkomsten van de constante af te trekken, krijg ik de gradients. Dit mag op een omweg lijken maar gaat eigenlijk helpen met de berekening van de gains. 
 
@@ -186,7 +187,7 @@ In vergelijking met andere machine learning of ai methoden, zijn trees vrij door
 Nu we een vogelvlucht genomen hebben over elke stap van het programma, kun jij kijken naar hoe elk deel ervan is gebouwd.
 
 ## Sorteren
-Het sorteren van de observaties is nodig om een gain voor elke threshold te kunnen berekenen. Omdat ik de orde van een variabele wil gebruiken om meerdere arrays te sorteren, gebruik ik een functie die de sorterende index teruggeeft. 
+Het sorteren van de observaties is nodig om een gain voor elke threshold te kunnen berekenen. Omdat ik de orde van een variabele wil gebruiken om meerdere arrays te sorteren, gebruik ik een functie die de sorterende index teruggeeft in plaats van de gesorteerd input array *arr*. 
 
 ```C
 size_t *arg_sort(float *arr, size_t n) {
@@ -220,7 +221,7 @@ size_t *arg_sort(float *arr, size_t n) {
 }
 ```
 
-Ik gebruik het bubblesort algorithm omdat ik het gemakkelijk te herinneren vind. C heeft een eigen sorteren functie in de standard library, maar ik denk niet dat het of een alternatieve functie de sorterende indices teruggeeft. 
+Om te sorten gebruik ik het bubblesort algorithm omdat ik het gemakkelijk te herinneren vind. C heeft een eigen sorteren functie in de standard library, maar ik denk niet dat het of een alternatieve functie de sorterende indices teruggeeft. 
 
 Een ander detail is het gebruik van *memcpy*. Ik doe het zodat ik niet per ongeluk de data achter het *arr* dynamische array verander.
 
@@ -291,13 +292,13 @@ float compute_gain(float gradient_left, float gradient_right, float hessian_left
 }
 ```
 
-Ik ga met de *right_side* van de formule beginnen. Die geeft de gain als je de node niet splitst, maar wanneer jij het als bladje zet. Het is de gain als je de tree niet laat groeien.
+Ik ga met de *right_side* van de formule beginnen. Die geeft de gain als je de node niet splitst, maar daarentegen als je het als bladje zet. In andere worden is het de gain als je de tree niet laat groeien.
 
 De left_side van de formule kijkt naar de informatie die gegenereerd wordt door de split. Als je nadenkt over de formule, zie je dat het een vrij gangbare vorm heeft: $x^2 + y^2 - (x + y)^2$, wat enkel positief kan zijn als $x$ het minteken van $y$ heeft. Dus het doel van de regression tree is de variatie rond het gemiddelde van $Y$ zo goed mogelijk te verklaren. Dit door de afhankelijkheid van $Y$ met $X$ te ontdekken.
 
 ## De correcte fit zoeken
 
-In vergelijking met bovenstaande discussies, is de fit functie eenvoudig. Het vindt een gemiddelde van uitkomst Y, definieert de gradients en de hessians dynamische arrays, alloceert geheugen aan de *root* node en roept het recursieve *\_split_node* aan. 
+De fit functie is relatief eenvoudig. Het vindt het gemiddelde van uitkomst Y, definieert de gradients en de hessians dynamische arrays, alloceert geheugen aan de *root* node en roept het recursieve *\_split_node* aan. 
 
 ```C
 void fit(RegressionTree *reg_tree, float **X, float *Y, size_t n, size_t m) {
@@ -338,13 +339,13 @@ void fit(RegressionTree *reg_tree, float **X, float *Y, size_t n, size_t m) {
 
 Ik kijk eerst of een split gemaakt kan worden. Als de tree zijn *max\_depth* aangetroffen heeft, of als de gesplitste nodes een te klein aantal observaties zouden hebben, geeft de functie de bladjeswaarde terug met *compute\_leaf\_value* (zie de laatste *else* instructie). De fit van een branch van de tree is gedaan.
 
-Wanneer het tegenovergestelde gebeurt, dat is, wanneer een split gemaakt kan worden, kruist de functie alle variabelen op zoek naar de variabele wiens split een beste gain geeft, en de *threshold* ervan. 
+Wanneer het tegenovergestelde gebeurt, dat is, wanneer een split gemaakt kan worden, kruist de functie alle variabelen door op zoek naar de variabele wiens split een beste gain geeft, en de *threshold* ervan. 
 
 Veel code is dan verantwoordelijk om de split voor te bereiden door de correcte gegevens aan de linkse en de rechtse children nodes te versturen. Om te weten welke waarde boven en welke waarde onder de threshold liggen, gebruik ik die MaskIndices struct. Als een waarde onder de threshold ligt, heb ik beslist om het naar de linkse node te sturen. Wat in twee Python regels zou gebeuren, gebeurt soms met 30 lijnen van C.
 
 Voordat ik *\_split\_node* opnieuw aanroep, wijs ik geheugen toe voor de linkse en rechtse children nodes. Ik let ook op dat de depth van elk kind toeneemt met één.
 
-Een verschil met andere functies die gebruikt worden om recursie te leren, is dat elke roep aan *\_split\_node* iets teruggeeft. De edge voorwaarde is *should\_split*. 
+Een verschil met andere functies die gebruikt worden om recursie te leren, is dat elke roep aan *\_split\_node* iets teruggeeft. De edge voorwaarde van de recursie is *should\_split*. 
 
 ```C
 Node *_split_node(
@@ -492,7 +493,7 @@ Node *_split_node(
 
 De eerste functie binnen *_split\_node* die aangeroepen wordt is *should\_split*. Het gaat kijken naar een paar condities om te weten of een split is toegestaan. Als ja, is er toch een verdere check naar de *gain*. De *gain* van de top gevonden split moet positief zijn, anders geeft de regression tree zonder de nieuwe split een betere fit. 
 
-Ik vind de *min\_leaf\_samples check* interessant. $\mathrm{n\_samples} / 2$ is de minimale grootte van het grootste van de linkse en rechtse children nodes. Het $min\_leaf\_samples$ is dus de kleinste grootte van het grootste kind dat een split toestaat.
+Ik vind de *min\_leaf\_samples* check interessant. $\frac{\text{n\_samples}}{2}$ is de minimale grootte van het grootste van de linkse en rechtse children nodes. Het *min\_leaf\_samples* is dus de kleinste aantal observaties van het grootste kind dat een split toestaat.
 
 ```C
 bool should_split(int depth, int n_samples, int max_depth, int min_leaf_samples) {
@@ -507,7 +508,7 @@ bool should_split(int depth, int n_samples, int max_depth, int min_leaf_samples)
 }
 ```
 
-De tweede aangeroepen functie binnen *_split\_node* is *find\_best\_split*. Die zoekt naar een threshold op een array *arr* die de grootste gain teruggeeft. Die gain krijgt als argumenten de som van de linkse en rechtse gradiënten. De hessians zijn hier enkel gebruikt om de sommen te normaliseren. 
+De tweede aangeroepen functie binnen *_split\_node* is *find\_best\_split*. Die zoekt naar een threshold op een array *arr* die de grootste gain teruggeeft. Die gain krijgt als argumenten de sommen van de linkse en rechtse gradiënten. De hessians zijn hier enkel gebruikt om de sommen te normaliseren. 
 
 Om ingewikkelde data masking te verminderen, gebruik ik de eerder getoonde *arg\_sort* en *reorder* functies, samen met het gebruik van cumulative sommen. Ik kan dus de linkse en rechtse som eenvoudig krijgen. Ik zou willen zeggen dat het de efficiëntere manier om dingen te doen is, maar aangezien ik een bubblesort moet gebruiken, weet ik het niet. Naar mijn mening is het zeker gemakkelijk om te lezen.
 
@@ -609,7 +610,7 @@ Als jij tot hier bent geraakt, gefeliciteerd, jij weet hoe je een regression tre
 
 ## Plezante tree traversals
 
-Ik begin met mijn favoriet van de twee: het feature importance berekenen. Die geven het belang van elke variabele van *X*. Dit wordt gedaan door te vinden op welke variabele of feature elke split gedaan is, en de gain van die split toe te voegen aan een *feature_importances* array van grootte $1 \times m$ waar $m$ het aantal variabelen is.
+Ik begin met mijn favoriet van de twee: het berekening van de feature importances. Deze geven het belang van elke variabele van *X*. Dit wordt gedaan door te vinden op welke variabele of feature elke split gedaan is, en de gain van die split toe te voegen aan een *feature_importances* array van grootte $1 \times m$ waar $m$ het aantal variabelen is.
 
 ```C
 void _feature_importance(Node *node, float *feature_importances) {
@@ -682,8 +683,8 @@ Er zijn een paar interessante oefeningen die je kunt doen om nog meer te leren v
 
 - Hierboven hebben we gebruik gemaakt van de hele dataset om een split te vinden. Naarmate het aantal training observaties groter wordt, wordt dat minder interessant. Moderne tools zoals LightGBM en XGBoost kunnen gebruik maken van histogram binning om big data beter te handelen. In Python is het niet zo moeilijk om dit te doen met een paar numpy functies zoals *searchsorted* en *bincount*. Je kunt het dus in Python proberen en dan de oplossing naar C vertalen.
 
-Het idee is om de gradients en hessians per bin te sommeren om daarna de split te vinden door elke bin te zoeken in plaats van de hele dataset. Als je nog zogenoemde exacte splits wilt blijven vinden kun je ook een oplossing zoeken voor duplicate feature waarden. Dit kan ook efficiëntie geven, zeker als je met een klein aantal waarden werkt.
+  Het idee is om de gradients en hessians per bin te sommeren om daarna de split te vinden door elke bin te zoeken in plaats van de hele dataset. Als je nog zogenoemde exacte splits wilt blijven vinden kun je ook een oplossing zoeken voor duplicate feature waarden. Dit kan ook efficiëntie geven, zeker als je met een klein aantal waarden werkt.
 
-- Een andere oefening kan zijn om van de regression tree, random forest of gradient boosting machine te maken. Tot een zekere mate is dat eigenlijk eenvoudiger dan de oefening daarboven.
+- Een andere oefening kan zijn om van de regression tree, een random forest of een gradient boosting machine te maken. Tot een zekere mate is dat eigenlijk eenvoudiger dan de oefening daarboven.
 
 - Nog een interessante oefening zou zijn om een decision tree te maken in plaats van een regression tree. Nog ingewikkelder zou het zijn om meer dan twee discrete uitkomsten goed te voorspellen.
