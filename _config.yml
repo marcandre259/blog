@@ -3,6 +3,7 @@ author: Marc-André Chénier
 theme: minima
 url: "https://marcandre259.github.io"
 baseurl: "/blog"
+github_username: marcandre259
 
 kramdown:
   math_engine: mathjax
