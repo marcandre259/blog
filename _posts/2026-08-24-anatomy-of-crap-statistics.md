@@ -16,6 +16,10 @@ C'est une comparaison qui m'a surpris. Ce genre d'analyse contrôle habituelleme
 
 Si on contrôle plutôt pour la date de décès comme le font les auteurs, on contrôle sur un *collider* ([McElreath, *Statistical Rethinking*, chap. 6](https://xcelab.net/rm/statistical-rethinking/)).
 
+Un *collider* est une variable causée par au moins deux autres variables. Contrôler pour un *collider* peut créer une association entre ses causes, même lorsqu'elles sont indépendantes.
+
+Le [paradoxe de Berkson](https://en.wikipedia.org/wiki/Berkson%27s_paradox) en donne un exemple. Supposons que deux virus, `A` et `B`, apparaissent indépendamment dans la population et qu'une personne soit hospitalisée dès qu'elle contracte l'un ou l'autre. Dans la population générale, la présence de `A` ne donne aucune information sur celle de `B`. Mais parmi les personnes hospitalisées, une personne qui n'a pas `A` a nécessairement `B`. En sélectionnant seulement les personnes hospitalisées, on contrôle pour un *collider* et on crée une association négative entre les deux virus, alors qu'aucun n'a d'effet sur l'autre.
+
 Prenons le volleyball, qui gagne en popularité après son entrée aux Jeux olympiques en 1964. Les nouveaux athlètes ont alors autour de 20 ans. Ils sont donc nés vers 1944 et pratiquent plus souvent ce sport que les cohortes précédentes. Parmi les personnes mortes en 1980, ces volleyeurs sont morts vers 36 ans, tandis qu'une personne née en 1900 est morte à 80 ans. En contrôlant pour l'année de décès, on associe donc le volleyball à une mort plus jeune puisque ses pratiquants viennent surtout de cohortes plus récentes que celles des autres personnes mortes la même année.
 
 Contrôler pour la date de naissance permet plutôt de comparer des personnes de la même cohorte. Le biais créé par la date de décès peut être représenté sur un *Directed Acyclic Graph* (DAG).
