@@ -14,9 +14,7 @@ Mais le problème auquel je veux donner plus de temps risque d'être répété p
 
 C'est une comparaison qui m'a surpris. Ce genre d'analyse contrôle habituellement plutôt pour la date de naissance. On évite ainsi de comparer les pratiquants d'un sport récent avec des individus nés beaucoup plus tôt, à une époque où l'espérance de vie était moins grande.
 
-Si on contrôle plutôt pour la date de décès comme le font les auteurs, on contrôle sur un *collider* ([McElreath, *Statistical Rethinking*, chap. 6](https://xcelab.net/rm/statistical-rethinking/)).
-
-Un *collider* est une variable causée par au moins deux autres variables. Contrôler pour un *collider* peut créer une association entre ses causes, même lorsqu'elles sont indépendantes.
+Si on contrôle plutôt pour la date de décès comme le font les auteurs, on contrôle sur un *collider* ([McElreath, *Statistical Rethinking*, chap. 6](https://xcelab.net/rm/statistical-rethinking/)). Un *collider* est une variable causée par au moins deux autres variables. Contrôler pour un *collider* peut créer une association entre ses causes, même lorsqu'elles sont indépendantes.
 
 Le [paradoxe de Berkson](https://en.wikipedia.org/wiki/Berkson%27s_paradox) en donne un exemple. Supposons que deux virus, `A` et `B`, apparaissent indépendamment dans la population et qu'une personne soit hospitalisée dès qu'elle contracte l'un ou l'autre. Dans la population générale, la présence de `A` ne donne aucune information sur celle de `B`. Mais parmi les personnes hospitalisées, une personne qui n'a pas `A` a nécessairement `B`. En sélectionnant seulement les personnes hospitalisées, on contrôle pour un *collider* et on crée une association négative entre les deux virus, alors qu'aucun n'a d'effet sur l'autre.
 
