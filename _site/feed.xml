@@ -1,0 +1,1207 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/blog/" rel="alternate" type="text/html" /><updated>2025-10-09T22:08:50+02:00</updated><id>http://localhost:4000/blog/feed.xml</id><title type="html">Tapestry of flimsy steps</title><author><name>Marc-André Chénier</name></author><entry><title type="html">Regression tree algorithm van niets in C</title><link href="http://localhost:4000/blog/2025/10/09/regression-tree.html" rel="alternate" type="text/html" title="Regression tree algorithm van niets in C" /><published>2025-10-09T00:00:00+02:00</published><updated>2025-10-09T00:00:00+02:00</updated><id>http://localhost:4000/blog/2025/10/09/regression-tree</id><content type="html" xml:base="http://localhost:4000/blog/2025/10/09/regression-tree.html"><![CDATA[<h2 id="motivatie">Motivatie</h2>
+<p>In deze blogpost beschrijf ik een basaal regression tree algorithm in C. Regression en decision trees zijn vandaag overal te vinden in het machine learning landschap. Nog in 2025 en ondanks het optreden van pre-trained one-shot transformer models, zijn gradient boosting machines (GBM) vaak de beste methoden om goede voorspellingen te maken (zie bvb. W. Rizkallah, Journal of Big Data, 2025). Ook in de industrie kom ik vaak algorithmen tegen zoals LightGBM die variaties zijn op de beroemde GBM.</p>
+
+<p>Van alle onderdelen die deel uitmaken van GBM’s en hun verschillende implementaties, is de regression of decision tree het belangrijkste. Bovenop andere innovaties en componenten zoals loss functies, feature binning, gradient descent, one-side sampling, zitten die trees aan de basis van GBM’s en gerelateerde algorithmen zoals de Random Forest.</p>
+
+<p>Het verschil tussen regression en decision zit in de uitkomst die de analist probeert te voorspellen. Is de uitkomst discreet: ja of nee, met twee of meer categorieën, dan heb je met een decision tree te maken. Is de uitkomst continu, huisprijzen bijvoorbeeld, dan heb je met een regression tree te maken.</p>
+
+<p>In wezen gebruiken beide trees dezelfde fit strategie. In een gedefinieerd aantal stappen, delen zij een data sample in een aantal bladjes (leaves) zodat het verschil tussen elke bladjeswaarden en zijn gerelateerde uitkomsten het kleinste  is. Nu, als je gewoon het verschil tussen uitkomsten en sample bladjes wilt verminderen, zou je het beste vinden om een bladje per datum te definiëren. Maar dan heeft het tree model geen generaliserend vermogen. Dus moeten er concessies gedaan worden in de richting van generalisatie. Dit gebeurt door het zetten van parameters zoals het minimum aantal data per bladje, de maximale diepte van de tree of de minimale gain die toegestaan is.</p>
+
+<h2 id="structuur">Structuur</h2>
+<p>De bedoeling achter deze post is dat jij zelf kunt leren hoe regression trees werken door het algorithm zelf in C te schrijven. Dus ga ik de nodige functies geven zonder hen samen te zetten. Volgens mij is dat een plezante manier om iets te leren. Ik ben zelf zeker geen C expert, dus let op want er gaan memory leaks in de code zijn. Ik geef hellemal geen andact aan de leaks. Dit is zeker geen code dat klaar voor productie is.</p>
+
+<p>Ik ga proberen de intuïtie en de logica achter elke code snippet door te geven. Tot een zekere hoogte.</p>
+
+<p>De focus blijft op de implementatie en niet op de intuïtie, dus raad ik aan die die meer intuïtie nodig hebben om het te vinden op <a href="https://scikit-learn.org/stable/auto_examples/tree/plot_tree_regression.html#sphx-glr-auto-examples-tree-plot-tree-regression-py">scikit-learn</a>.</p>
+
+<h2 id="nuttige-concepten">Nuttige concepten</h2>
+<p>De implementatie gebruikt een mooi aantal concepten die komen van programmatie en statistiek domeinen.</p>
+
+<p>Om de beste splits tussen bladjes te vinden moet de data gesorteerd worden volgens de orde van grootte van elke variabele. Het is dus nodig om een sorting algorithm te gebruiken.</p>
+
+<p>Om te kunnen beslissen of een split bevorderlijk is, gebruiken we zogenoemde gradients, hessians en een gain formule. In dit geval, zijn de gradients min of meer gecentreerde uitkomsten, en de hessians zijn unit vectors.</p>
+
+<p>Recursie gaat vaak gebruikt worden. De tree zelf is gebouwd door een recursief algorithm. Om de gefitte trees te kunnen gebruiken om voorspellingen te doen moet je ze ook met recursie doorkruisen. Tree traversal is ook gebruikt om de feature importance te berekenen. Men kan zeggen dat een regression tree een weg geeft aan elk observatie (of instancie in machine learning taal…), en dat die weg gevolgd moet worden door recursie. Dus recursie gaat hierbeneden een heel belangrijke rol spelen.</p>
+
+<p>Om het algorithm te kunnen testen, gebruik ik ook de simpele random number generator (RNG) van de C standard library. Data simulatie is dus ook een aanwezig concept.</p>
+
+<p>Daarna zijn er een aantal dingen die geassocieerd zijn met het gebruik van C. Namelijk: pointers en memory addresses, stack en heap, struct’s en data types. Ik heb enkel een praktisch begrip van die concepten en ga ze vandaar zonder diepte proberen uit te leggen. Het belangrijkste daar is te weten dat een dynamische array in C een pointer is naar het eerste memory address van de array’s data. De analist moet dus altijd goed bijhouden hoe lang die array is. Anders krijg jij rommel.</p>
+
+<p>Ook belangrijk voor recursieve functies is het verschil tussen data die zit op de stack en data die zit op de heap. Data op de stack wordt verwijderd zodra het buiten de huidige scope van het programma zit. Data op de heap is het tegenovergestelde. Het wordt bijgehouden tot het vrijgelaten wordt door de analist. Dus heap data kan veranderd worden in een functie en die veranderde data kan binnen de scope van een tweede functie gebruikt worden. Dat is vaak nodig met recursie.</p>
+
+<h2 id="ingrediënten">Ingrediënten</h2>
+
+<p>Het is goed om te beginnen met het kleine aantal ingrediënten die gebruikt zullen worden. Het eerste houdt info bij over een mogelijke split. Het is zo gedefinieerd:</p>
+
+<pre><code class="language-C">typedef struct SplitInfo {
+  float gain; 
+  float threshold; 
+} SplitInfo;
+</code></pre>
+
+<p>Die SplitInfo struct moet gegevens over de beste split van elke feature behouden. Elke split heeft een threshold, waardoor observaties wiens waarde op die feature kleiner is dan de threshold naar de zogenoemde left children node gegeven worden, en de rest naar de right children node.</p>
+
+<p>De gain wordt behouden om twee redenen. Ten eerste om de beste split van verschillende features te kunnen vergelijken. Ten tweede kan elke split gain gebruikt worden om feature importance te berekenen.</p>
+
+<p>De tree zelf is een verzameling van gerelateerde nodes. Elke node heeft een diepte. Op diepte nul vindt men de root node die de hele dataset bevat. Op diepte één is deze root node gedeeld in twee children nodes. Elk deel kreeg zijn eigen observaties. Dan worden elk van die twee nodes op diepte één nogmaals in twee gedeeld enzovoort. Op de laatste diepte zitten de bladjes. Die nodes geven voorspellingen op basis van de voorafgaande splitsingen. De regression tree is eigenlijk een binary tree.</p>
+
+<p>Elke node is dus zo gedefinieerd:</p>
+
+<pre><code class="language-C">typedef struct Node {
+  int feature_id;
+  float threshold;
+  float value;
+  int depth;
+  struct Node *left;
+  struct Node *right;
+  bool is_leaf;
+  float gain;
+} Node;
+</code></pre>
+
+<p>De left en right Node’s zijn pointers naar children nodes. Omdat elke Node zijn eigen kinderen omvat kan men zeggen dat het een recursief object is. Daarom gebruik ik pointers voor de left en right nodes. Anders zou een Node object een oneindig aantal kinderen en klein-kinderen nodes hebben.</p>
+
+<p>Een Node heeft ook een feature_id en een threshold, om te behouden op welke feature en op welke waarde de data gesplitst was. Om te weten of de tree groot genoeg is, behoud ik ook de depth van de node.</p>
+
+<p>Als een node een bladje is, krijgt het een waarde van <em>true</em> op <em>is_leaf</em>. Anders krijgt de node daar een waarde van <em>false</em>. Bladjes krijgen ook een <em>value</em>, maar geen feature_id of threshold aangezien zij geen children nodes hebben.</p>
+
+<p>Eindelijk definieer ik de <em>RegressionTree</em> struct:</p>
+
+<pre><code class="language-C">typedef struct RegressionTree {
+  int max_depth;
+  int min_leaf_samples;
+  float constant;
+  Node *root;
+
+} RegressionTree;
+</code></pre>
+
+<p>De tree bevat de root node, twee complexiteit beperkingen en een constante. Vanaf de root node kan je de hele tree doorkruisen. De complexiteit beperkingen zijn gebruikt om iets toe te geven aan generaliteit. In het kort omdat ik voorspellingen op nieuwe data wil kunnen doen met het model.</p>
+
+<p>De constante is het gemiddelde van de uitkomst waarden. Door de uitkomsten van de constante af te trekken, krijg ik de gradients. Dit mag op een omweg lijken maar gaat eigenlijk helpen met de berekening van de gains.</p>
+
+<p>Een laatste struct die ik gebruik is de <em>MaskIndices</em>:</p>
+
+<pre><code class="language-C">typedef struct MaskIndices {
+  int *left_indices;
+  size_t left_n;
+  int *right_indices;
+  size_t right_n;
+} MaskIndices;
+</code></pre>
+
+<p>Zodra jij een split threshold vindt, ga je willen weten welke van die observaties moet naar de linkse en welke naar de rechtse children nodes. Deze gegevens worden door de linkse en de rechtse indices behouden. Met C is het ingewikkeld om de hoeveelheid onderdelen van een dynamische array te berekenen, dus neem ik ook <em>left_n</em> en <em>right_n</em> mee.</p>
+
+<h2 id="functies">Functies</h2>
+
+<h3 id="main-functie">Main functie</h3>
+<p>Oké, eindelijk treffen wij de inhoud. Laat me beginnen met het einde van dit project: de <em>main</em> functie. Die omvat alle belangrijke stappen, van de declaratie van een gesimuleerde dataset en een regression tree model tot de ontdekking van de feature importances.</p>
+
+<pre><code class="language-C">int main() {
+  srand(time(NULL));
+
+  size_t n = 1000;
+  size_t m = 3;
+  float **X = (float **)malloc(sizeof(float *) * m);
+  X[0] = (float *)malloc(sizeof(float) * n);
+  X[1] = (float *)malloc(sizeof(float) * n);
+  X[2] = (float *)malloc(sizeof(float) * n);
+
+  for (int i = 0; i &lt; n; i++) {
+    for (int j = 0; j &lt; m; j++) {
+      X[j][i] = (float)rand() / RAND_MAX;
+    }
+  }
+
+  // Assign a y array, with a simple relation to the x values
+  float *Y = (float *)malloc(sizeof(float) * n);
+
+  for (int i = 0; i &lt; n; i++) {
+    Y[i] = X[0][i] * 0.2 + X[1][i] * 0.5;
+  }
+
+  float mean_y = mean(Y, n);
+</code></pre>
+
+<p>Om te beginnen creëer ik een dataset met drie features X en een uitkomst Y. De features zitten binnen de dubbele pointer X. Van die dubbele pointer zijn de drie pointer columns toegankelijk. We gaan veel met de pointers spelen aangezien ze nodig zijn om dynamische arrays zoals X en Y te bouwen in C.</p>
+
+<p>Om waarde te geven aan X neem ik samples van een uniforme distributie. <em>rand</em> geeft een waarde tussen 0 en <em>RAND_MAX</em> terug. Dus door te delen met RAND_MAX krijg jij een waarde tussen 0 en 1. Goed genoeg om te testen.</p>
+
+<p>Y is compleet afhankelijk van de eerste en tweede kolom van X. Dus, als ik kijk naar de feature importances, zou ik een nul importance waarde zien voor de derde kolom van X.</p>
+
+<pre><code class="language-C">  RegressionTree *reg_tree = malloc(sizeof(RegressionTree));
+
+  reg_tree-&gt;max_depth = 3;
+  reg_tree-&gt;min_leaf_samples = 5;
+
+
+  fit(reg_tree, X, Y, n, m);
+
+  float *predictions = predict(reg_tree, X, n, m);
+</code></pre>
+
+<p>Daarna declareer ik een <em>RegressionTree</em> op de heap, zodat ik het straks kan fitten met <em>fit</em>. <em>fit</em> is het belangrijkste deel van dit programma en is verantwoordelijk voor de splitsing van X in een aantal bladjes.</p>
+
+<p><em>predict</em> geeft dan een voorspelling voor elke observatie in X. Hoe goed is de gemiddelde voorspelling? Dat kan door de mean squared error (mse) gecheckt worden.</p>
+
+<pre><code class="language-C">  float mse_model = mse_compute(Y, predictions, n);
+
+  printf("MSE model: %.3f\n", mse_model);
+
+  float *mean_y_vector = (float *)malloc(sizeof(float) * n);
+
+  for (int i = 0; i &lt; n; i++) {
+    mean_y_vector[i] = mean_y;
+  }
+
+  float mse_null = mse_compute(Y, mean_y_vector, n);
+
+  printf("MSE null: %.3f\n", mse_null);
+</code></pre>
+
+<p>Ik doe een evaluatie door de mse van het tree model te vergelijken met die van een zogenoemd null model. In dit geval is het null model het gemiddelde van alle Y waarden. In andere woorden, een tree met een enige node.</p>
+
+<pre><code class="language-C">  float *feature_importances = compute_feature_importance(reg_tree, m);
+
+  for (int i = 0; i &lt; m; i++) {
+    printf("Feat importance %d: %.3f\n", i, feature_importances[i]);
+  }
+</code></pre>
+
+<p>In vergelijking met andere machine learning of ai methoden, zijn trees vrij doorzichtig. Door de gain van elke split te sommeren kan men een vertaling krijgen van welke variabelen de meeste belangrijke zijn volgens het model.</p>
+
+<p>Nu we een vogelvlucht genomen hebben over elke stap van het programma, kun jij kijken naar hoe elk deel ervan is gebouwd.</p>
+
+<h2 id="sorteren">Sorteren</h2>
+<p>Het sorteren van de observaties is nodig om een gain voor elke threshold te kunnen berekenen. Omdat ik de orde van een variabele wil gebruiken om meerdere arrays te sorteren, gebruik ik een functie die de sorterende index teruggeeft in plaats van de gesorteerd input array <em>arr</em>.</p>
+
+<pre><code class="language-C">size_t *arg_sort(float *arr, size_t n) {
+  float *arr_copy = (float *)malloc(sizeof(float) * n);
+  memcpy(arr_copy, arr, sizeof(float) * n);
+
+  size_t *index_arr = (size_t *)malloc(sizeof(size_t) * n);
+  for (int i = 0; i &lt; n; i++) {
+    index_arr[i] = i;
+  }
+
+  float next_value;
+  size_t next_index;
+
+  for (int i = 0; i &lt; n; i++) {
+    for (int j = 0; j &lt; (n - i - 1); j++) {
+      if (arr_copy[j] &gt; arr_copy[j+1]) {
+        next_value = arr_copy[j + 1];
+        next_index = index_arr[j + 1];
+
+        arr_copy[j + 1] = arr_copy[j];
+        index_arr[j + 1] = index_arr[j];
+
+        arr_copy[j] = next_value;
+        index_arr[j] = next_index;
+      }
+    }
+  }
+
+  return index_arr;
+}
+</code></pre>
+
+<p>Om te sorten gebruik ik het bubblesort algorithm omdat ik het gemakkelijk te herinneren vind. C heeft een eigen sorteren functie in de standard library, maar ik denk niet dat het of een alternatieve functie de sorterende indices teruggeeft.</p>
+
+<p>Een ander detail is het gebruik van <em>memcpy</em>. Ik doe het zodat ik niet per ongeluk de data achter het <em>arr</em> dynamische array verander.</p>
+
+<p>Wanneer ik de sorterende indices heb, moet een andere functie, <em>reorder</em>, het eigenlijke sorteren doen.</p>
+
+<pre><code class="language-C">float *reorder(float *arr, size_t *reorder_indices, size_t n) {
+  float *reordered_arr = (float *)malloc(sizeof(float) * n);
+  for (int i = 0; i &lt; n; i++) {
+    reordered_arr[i] = arr[reorder_indices[i]];
+  }
+
+  return reordered_arr;
+}
+</code></pre>
+
+<h2 id="een-beetje-rekenkunde">Een beetje rekenkunde</h2>
+
+<p>Door het programma zijn er een aantal kleine functies die verantwoordelijk zijn voor mathematische operaties. Eén heb je al gezien:</p>
+
+<pre><code class="language-C">float mse_compute(float *actuals, float *predictions, size_t n) {
+  float sse = 0;
+  for (int i = 0; i &lt; n; i++) {
+    sse += pow(actuals[i] - predictions[i], 2.0);
+  }
+
+  return sse/(float)n;
+}
+</code></pre>
+
+<p><em>mse_compute</em> is een van de eenvoudigere functies in het programma en kan voor een beginner plezant zijn om een beetje met C te spelen. Anders is het een heel gewone functie en vraagt dus geen uitleg.</p>
+
+<p>Op hetzelfde niveau zit een nuttige <em>mean</em> functie:</p>
+
+<pre><code class="language-C">float mean(float *arr, size_t n) {
+  float sum = 0;
+  for (int i = 0; i &lt; n; i++) {
+    sum += arr[i];
+  }
+  return sum/(float)n;
+}
+</code></pre>
+
+<p>Nu kan ik het hebben over de twee interessante rekenen functies: <em>compute_gain</em> en <em>compute_leaf_value</em>. Laat me met <em>compute_leaf_value</em> beginnen.</p>
+
+<pre><code class="language-C">float compute_leaf_value(float G_sum, float H_sum) {
+  return -G_sum/H_sum;
+}
+</code></pre>
+
+<p>Hier wordt de waarde van een bladje berekend. <em>G_sum</em> is de som van de gradients in het bladje. Kort gezegd is hier een gradient het verschil tussen het gemiddelde van Y en een Y sample. Dus als je zeg maar twee Y samples hebt in een bladje, zijn de gradients $\mathrm{mean}(Y) - Y_1$ en $\mathrm{mean}(Y) - Y_2$. Herinner je dat de hessian hier altijd de waarde 1 heeft. Dan geeft <em>compute_leaf_value</em> gewoon het negatieve gemiddelde gradient van het bladje.</p>
+
+<p>Waarom neem ik het negatieve? Veronderstel dat $Y_1$ en $Y_2$ zijn allebei groter dan $\mathrm{mean}(Y)$. Dan gaan de gradients negatief zijn, maar als jij het getal door -1 vermenigvuldigt, krijg jij een bladjeswaarde die positief is. En als jij aan de bladjeswaarde het gemiddelde van Y toevoegt, krijg jij net een voorspelling die zit tussen $Y_1$ en $Y_2$.</p>
+
+<p>De gradients zijn dus bruikbaar niet enkel om node splits te vinden, maar ook om de voorspelling te maken. In die zin zijn de gradients herbruikbaar.</p>
+
+<p>In <em>compute_gain</em> kan ik tonen hoe deze gebruikt worden om een split te vinden. Dit gebeurt door de gains van alle mogelijke splits per feature of variabele te vergelijken.</p>
+
+<pre><code class="language-C">float compute_gain(float gradient_left, float gradient_right, float hessian_left, float hessian_right) {
+  float left_side = pow(gradient_left, 2.0) / hessian_left + pow(gradient_right, 2.0) / hessian_right;
+  float right_side = pow(gradient_left + gradient_right, 2.0) / (hessian_left + hessian_right);
+
+  return left_side - right_side;
+}
+</code></pre>
+
+<p>Ik ga met de <em>right_side</em> van de formule beginnen. Die geeft de gain als je de node niet splitst, maar daarentegen als je het als bladje zet. In andere worden is het de gain als je de tree niet laat groeien.</p>
+
+<p>De left_side van de formule kijkt naar de informatie die gegenereerd wordt door de split. Als je nadenkt over de formule, zie je dat het een vrij gangbare vorm heeft: $x^2 + y^2 - (x + y)^2$, wat enkel positief kan zijn als $x$ het minteken van $y$ heeft. Dus het doel van de regression tree is de variatie rond het gemiddelde van $Y$ zo goed mogelijk te verklaren. Dit door de afhankelijkheid van $Y$ met $X$ te ontdekken.</p>
+
+<h2 id="de-correcte-fit-zoeken">De correcte fit zoeken</h2>
+
+<p>De fit functie is relatief eenvoudig. Het vindt het gemiddelde van uitkomst Y, definieert de gradients en de hessians dynamische arrays, alloceert geheugen aan de <em>root</em> node en roept het recursieve <em>_split_node</em> aan.</p>
+
+<pre><code class="language-C">void fit(RegressionTree *reg_tree, float **X, float *Y, size_t n, size_t m) {
+  float mean_y = mean(Y, n);
+
+  // Assign mean_y as constant of tree (for predictions)
+  reg_tree-&gt;constant = mean_y;
+
+  float *gradients = (float *)malloc(sizeof(float) * n);
+  float *hessians = (float *)malloc(sizeof(float) * n);
+
+  for (int i = 0; i &lt; n; i++) {
+    gradients[i] = mean_y - Y[i];
+    hessians[i] = 1.0; 
+  }
+
+  reg_tree-&gt;root = (Node *)malloc(sizeof(Node));
+  Node *root = reg_tree-&gt;root;
+
+  root-&gt;depth = 0;
+  root-&gt;is_leaf = true;
+
+  _split_node(
+    root, 
+    reg_tree-&gt;max_depth, 
+    reg_tree-&gt;min_leaf_samples, 
+    X, 
+    gradients, 
+    hessians, 
+    m, 
+    n);
+}
+</code></pre>
+
+<h2 id="the-art-of-the-split">The art of the split</h2>
+
+<p><em>_split_node</em> is een dikke functie met een groot aantal argumenten en meerdere voorwaardelijke branches. Ik ga het kort beschrijven en daarna de hele functie hier dumpen. Het doel van die samenvatting is om structuur te geven aan een aandachtige lezing van <em>_split_node</em>.</p>
+
+<p>Ik kijk eerst of een split gemaakt kan worden. Als de tree zijn <em>max_depth</em> aangetroffen heeft, of als de gesplitste nodes een te klein aantal observaties zouden hebben, geeft de functie de bladjeswaarde terug met <em>compute_leaf_value</em> (zie de laatste <em>else</em> instructie). De fit van een branch van de tree is gedaan.</p>
+
+<p>Wanneer het tegenovergestelde gebeurt, dat is, wanneer een split gemaakt kan worden, kruist de functie alle variabelen door op zoek naar de variabele wiens split een beste gain geeft, en de <em>threshold</em> ervan.</p>
+
+<p>Veel code is dan verantwoordelijk om de split voor te bereiden door de correcte gegevens aan de linkse en de rechtse children nodes te versturen. Om te weten welke waarde boven en welke waarde onder de threshold liggen, gebruik ik die MaskIndices struct. Als een waarde onder de threshold ligt, heb ik beslist om het naar de linkse node te sturen. Wat in twee Python regels zou gebeuren, gebeurt soms met 30 lijnen van C.</p>
+
+<p>Voordat ik <em>_split_node</em> opnieuw aanroep, wijs ik geheugen toe voor de linkse en rechtse children nodes. Ik let ook op dat de depth van elk kind toeneemt met één.</p>
+
+<p>Een verschil met andere functies die gebruikt worden om recursie te leren, is dat elke roep aan <em>_split_node</em> iets teruggeeft. De edge voorwaarde van de recursie is <em>should_split</em>.</p>
+
+<pre><code class="language-C">Node *_split_node(
+  Node *root,
+  int max_depth,
+  int min_leaf_samples,
+  float **X, 
+  float *gradients,
+  float *hessians,
+  size_t m,
+  size_t n) {
+  int depth = root-&gt;depth;
+
+  bool split_decision = should_split(depth, n, max_depth, min_leaf_samples);
+
+  if (split_decision == true) {
+    root-&gt;is_leaf = false;
+
+    int best_feature_id = 0;
+    float best_threshold = 0;
+    float best_gain = 0;
+
+    // Need to first find the best split
+    for (int j = 0; j &lt; m; j++) {
+      SplitInfo split_info = find_best_split(X[j], gradients, hessians, n);
+      float current_gain = split_info.gain;
+      if (current_gain &gt; best_gain) {
+        best_feature_id = j;
+        best_threshold = split_info.threshold;
+        best_gain = current_gain;
+      }
+    }
+
+    if (best_gain &lt;= 0) {
+      float G_sum = 0;
+      float H_sum = 0;
+
+      for (int i = 0; i &lt; n; i++) {
+        G_sum += gradients[i];
+        H_sum += hessians[i];
+      }
+
+      root-&gt;value = compute_leaf_value(G_sum, H_sum);
+      root-&gt;is_leaf = true;
+    }
+    else { 
+      // Saving the gains of each split node to compute feature importance later
+      root-&gt;gain = best_gain;
+      root-&gt;threshold = best_threshold;
+      root-&gt;feature_id = best_feature_id;
+
+      MaskIndices mask_indices = split_on_feature_threshold(
+        best_threshold, 
+        best_feature_id,
+        X, 
+        n
+      );
+
+      // Make left and right arrays to pass to split_node
+      float *left_gradients = (float *)malloc(sizeof(float) * mask_indices.left_n);
+      float *left_hessians = (float *)malloc(sizeof(float) * mask_indices.left_n);
+
+      float *right_gradients = (float *)malloc(sizeof(float) * mask_indices.right_n);
+      float *right_hessians = (float *)malloc(sizeof(float) * mask_indices.right_n);
+
+      float **X_left = (float **)malloc(sizeof(float *) * m);
+      float **X_right = (float **)malloc(sizeof(float *) * m);
+
+      for (int j = 0; j &lt; m; j++) {
+        X_left[j] = (float *)malloc(sizeof(float) * mask_indices.left_n);
+        X_right[j] = (float *)malloc(sizeof(float) * mask_indices.right_n);
+      }
+
+      for (int i = 0; i &lt; mask_indices.left_n; i++) {
+        int left_index = mask_indices.left_indices[i];
+        left_gradients[i] = gradients[left_index];
+        left_hessians[i] = hessians[left_index];
+
+        for (int j = 0; j &lt; m; j++) {
+          X_left[j][i] = X[j][left_index];
+        }
+      }
+
+      for (int i = 0; i &lt; mask_indices.right_n; i++) {
+        int right_index = mask_indices.right_indices[i];
+        right_gradients[i] = gradients[right_index];
+        right_hessians[i] = hessians[right_index];
+
+        for (int j = 0; j &lt; m; j++) {
+          X_right[j][i] = X[j][right_index];
+        }
+      }
+      printf("Split: left_n=%zu, right_n=%zu\n", mask_indices.left_n, mask_indices.right_n);
+
+      // Define left and right nodes before recursive calls
+      Node *left_node = (Node *)malloc(sizeof(Node));
+      left_node-&gt;is_leaf = true;
+      left_node-&gt;depth = depth + 1;
+
+      Node *right_node = (Node *)malloc(sizeof(Node));
+      right_node-&gt;is_leaf = true;
+      right_node-&gt;depth = depth + 1;
+
+      root-&gt;left = _split_node(
+        left_node,
+        max_depth,
+        min_leaf_samples,
+        X_left,
+        left_gradients,
+        left_hessians,
+        m,
+        mask_indices.left_n
+      );
+
+      root-&gt;right = _split_node(
+        right_node,
+        max_depth,
+        min_leaf_samples,
+        X_right,
+        right_gradients,
+        right_hessians,
+        m,
+        mask_indices.right_n
+      );
+    }
+  }
+
+  // If the split is not acceptable
+  else {
+    float G_sum = 0;
+    float H_sum = 0;
+
+    for (int i = 0; i &lt; n; i++) {
+      G_sum += gradients[i];
+      H_sum += hessians[i];
+    }
+
+    root-&gt;value = compute_leaf_value(G_sum, H_sum);
+  }
+  // Now got to mask the data according to feature and threshold
+
+  return root;
+}
+</code></pre>
+
+<p>De eerste functie binnen <em>_split_node</em> die aangeroepen wordt is <em>should_split</em>. Het gaat kijken naar een paar condities om te weten of een split is toegestaan. Als ja, is er toch een verdere check naar de <em>gain</em>. De <em>gain</em> van de top gevonden split moet positief zijn, anders geeft de regression tree zonder de nieuwe split een betere fit.</p>
+
+<p>Ik vind de <em>min_leaf_samples</em> check interessant. $\frac{\text{n_samples}}{2}$ is de minimale grootte van het grootste van de linkse en rechtse children nodes. Het <em>min_leaf_samples</em> is dus de kleinste aantal observaties van het grootste kind dat een split toestaat.</p>
+
+<pre><code class="language-C">bool should_split(int depth, int n_samples, int max_depth, int min_leaf_samples) {
+  if (
+    depth &lt; max_depth &amp;&amp; (n_samples / 2) &gt; min_leaf_samples
+  ) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+</code></pre>
+
+<p>De tweede aangeroepen functie binnen <em>_split_node</em> is <em>find_best_split</em>. Die zoekt naar een threshold op een array <em>arr</em> die de grootste gain teruggeeft. Die gain krijgt als argumenten de sommen van de linkse en rechtse gradiënten. De hessians zijn hier enkel gebruikt om de sommen te normaliseren.</p>
+
+<p>Om ingewikkelde data masking te verminderen, gebruik ik de eerder getoonde <em>arg_sort</em> en <em>reorder</em> functies, samen met het gebruik van cumulative sommen. Ik kan dus de linkse en rechtse som eenvoudig krijgen. Ik zou willen zeggen dat het de efficiëntere manier om dingen te doen is, maar aangezien ik een bubblesort moet gebruiken, weet ik het niet. Naar mijn mening is het zeker gemakkelijk om te lezen.</p>
+
+<pre><code class="language-C">SplitInfo find_best_split(float *arr, float *gradients, float *hessians, size_t n) {
+  size_t *index_arr = arg_sort(arr, n);
+  float *sorted_arr = reorder(arr, index_arr, n);
+  float *sorted_gradients = reorder(gradients, index_arr, n);
+  float *sorted_hessians = reorder(hessians, index_arr, n);
+
+  float *cumsum_gradients = (float *)malloc(sizeof(float) * n);
+  float *cumsum_hessians = (float *)malloc(sizeof(float) * n);
+
+  cumsum_gradients[0] = sorted_gradients[0];
+  cumsum_hessians[0] = sorted_hessians[0];
+  // Need also the sums to get the left split gains
+  float sum_gradients = sorted_gradients[0];
+  float sum_hessians = sorted_hessians[0];
+
+  for (int i = 1; i &lt; n; i++) {
+    cumsum_gradients[i] = sorted_gradients[i] + cumsum_gradients[i-1];
+    cumsum_hessians[i] = sorted_hessians[i] + cumsum_hessians[i-1];
+
+    sum_gradients += sorted_gradients[i];
+    sum_hessians += sorted_hessians[i];
+  }
+
+  // Calculate gains for each possible split, and find best gain
+  float best_gain = 0;
+  float best_threshold = 0;
+
+  // Setting i to max n-2 to avoid illegal splits
+  for (int i = 0; i &lt; (n-1); i++) {
+    float gradient_left = cumsum_gradients[i];
+    float gradient_right = sum_gradients - gradient_left; 
+
+    float hessian_left = cumsum_hessians[i];
+    float hessian_right = sum_hessians - hessian_left; 
+
+    float gain = compute_gain(gradient_left, gradient_right, hessian_left, hessian_right);
+
+    if (gain &gt; best_gain) {
+      best_gain = gain;
+      best_threshold = sorted_arr[i];
+    }
+  }
+
+
+  SplitInfo split_info;
+
+  split_info.gain = best_gain;
+  split_info.threshold = best_threshold;
+
+  return split_info;
+}
+</code></pre>
+
+<p>Nadat ik de beste split threshold heb gevonden, moet ik wel masking gebruiken om de data ook te splitsen en te sturen naar de relevante kinderen. Ik begin door de maximale grootte van elke <em>indice</em> te deduceren, en zodra ik de werkelijke grootte van de indice arrays weet, roep ik realloc aan om het onnodige geheugen vrij te laten.</p>
+
+<pre><code class="language-C">MaskIndices split_on_feature_threshold(
+  float threshold, 
+  int feature_id, 
+  float **X, 
+  size_t n) {
+  int *left_indices = (int *)malloc(sizeof(int) * n);
+  int *right_indices = (int *)malloc(sizeof(int) * n);
+
+  int left_cnt = 0;
+  int right_cnt = 0;
+
+  for (int i = 0; i &lt; n; i++) {
+    if (X[feature_id][i] &lt;= threshold) {
+      left_indices[left_cnt] = i;
+      left_cnt++;
+    }
+    else {
+      right_indices[right_cnt] = i;
+      right_cnt++;
+    }
+  }
+
+  left_indices = realloc(left_indices, sizeof(int) * left_cnt);
+  right_indices = realloc(right_indices, sizeof(int) * right_cnt);
+
+  MaskIndices mask_indices;
+
+  mask_indices.left_indices = left_indices;
+  mask_indices.left_n = left_cnt;
+
+  mask_indices.right_indices = right_indices;
+  mask_indices.right_n = right_cnt;
+
+  return mask_indices;
+}
+</code></pre>
+
+<p>Als jij tot hier bent geraakt, gefeliciteerd, jij weet hoe je een regression tree kan fitten in C. Jij gaat toch misschien willen blijven lezen. Ik ga het hebben over twee spannende tree traversal functies. Die zijn heel nuttig om wat sap te krijgen van de regression tree.</p>
+
+<h2 id="plezante-tree-traversals">Plezante tree traversals</h2>
+
+<p>Ik begin met mijn favoriet van de twee: het berekening van de feature importances. Deze geven het belang van elke variabele van <em>X</em>. Dit wordt gedaan door te vinden op welke variabele of feature elke split gedaan is, en de gain van die split toe te voegen aan een <em>feature_importances</em> array van grootte $1 \times m$ waar $m$ het aantal variabelen is.</p>
+
+<pre><code class="language-C">void _feature_importance(Node *node, float *feature_importances) {
+  if (node-&gt;is_leaf == true) {
+    return;
+  }
+
+  else {
+    feature_importances[node-&gt;feature_id] += node-&gt;gain;
+
+    _feature_importance(node-&gt;left, feature_importances);
+    _feature_importance(node-&gt;right, feature_importances);
+  }
+}
+</code></pre>
+
+<p>Die recursieve functie wordt gebruikt binnen de <em>compute_feature_importance</em> functie. Die doet een beetje boekhouding.</p>
+
+<p>De tweede tree traversal wordt gedaan om de voorspelling te kunnen doen. Voor elke observatie met waarde op alle variabelen van X, willen we een voorspelling kunnen doen. Dit gebeurt door de weg te vinden door de splits tot het bladje met een voorspelling voor $x$ is getroffen.</p>
+
+<pre><code class="language-C">float _predict_single(Node *root, float *x, float constant) {
+  // x is a 1 by m array
+
+  if (root-&gt;is_leaf == false) {
+    if (x[root-&gt;feature_id] &lt;= root-&gt;threshold) {
+      return _predict_single(root-&gt;left, x, constant);
+    }
+    else {
+      return _predict_single(root-&gt;right, x, constant);
+    }
+  }
+  else {
+    return root-&gt;value + constant;
+  }
+}
+</code></pre>
+
+<p>Kortom wordt dat gedaan door te kijken, voor elke split tot een bladje, of $x$ onder of over de threshold van die split feature is. Volgens gaan we naar links of rechts, tot <code class="language-plaintext highlighter-rouge">root-&gt;is_leaf</code> true is.</p>
+
+<p>Nogmaals, doe ik een beetje boekhouding om voorspellingen te doen en te behouden voor elke $x$ binnen een matrix $X$:</p>
+
+<pre><code class="language-C">float *predict(RegressionTree *reg_tree, float **X, size_t n, size_t m) {
+  float *predictions = (float *)malloc(sizeof(float) *n);
+
+  float constant = reg_tree-&gt;constant;
+
+  for (int i = 0; i &lt; n; i++)  {
+    float *x = (float *)malloc(sizeof(float) * m);
+    // Prep the prediction vector
+    for (int j = 0; j &lt; m; j++) {
+      x[j] = X[j][i];
+    }
+
+    float value = _predict_single(reg_tree-&gt;root, x, constant);
+
+    free(x);
+
+    predictions[i] = value;
+  }
+
+  return predictions;
+}
+</code></pre>
+
+<h2 id="mogelijke-verdere-oefeningen">Mogelijke verdere oefeningen</h2>
+
+<p>Er zijn een paar interessante oefeningen die je kunt doen om nog meer te leren van regression trees.</p>
+
+<ul>
+  <li>
+    <p>Hierboven hebben we gebruik gemaakt van de hele dataset om een split te vinden. Naarmate het aantal training observaties groter wordt, wordt dat minder interessant. Moderne tools zoals LightGBM en XGBoost kunnen gebruik maken van histogram binning om big data beter te handelen. In Python is het niet zo moeilijk om dit te doen met een paar numpy functies zoals <em>searchsorted</em> en <em>bincount</em>. Je kunt het dus in Python proberen en dan de oplossing naar C vertalen.</p>
+
+    <p>Het idee is om de gradients en hessians per bin te sommeren om daarna de split te vinden door elke bin te zoeken in plaats van de hele dataset. Als je nog zogenoemde exacte splits wilt blijven vinden kun je ook een oplossing zoeken voor duplicate feature waarden. Dit kan ook efficiëntie geven, zeker als je met een klein aantal waarden werkt.</p>
+  </li>
+  <li>
+    <p>Een andere oefening kan zijn om van de regression tree, een random forest of een gradient boosting machine te maken. Tot een zekere mate is dat eigenlijk eenvoudiger dan de oefening daarboven.</p>
+  </li>
+  <li>
+    <p>Nog een interessante oefening zou zijn om een decision tree te maken in plaats van een regression tree. Nog ingewikkelder zou het zijn om meer dan twee discrete uitkomsten goed te voorspellen.</p>
+  </li>
+</ul>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Motivatie In deze blogpost beschrijf ik een basaal regression tree algorithm in C. Regression en decision trees zijn vandaag overal te vinden in het machine learning landschap. Nog in 2025 en ondanks het optreden van pre-trained one-shot transformer models, zijn gradient boosting machines (GBM) vaak de beste methoden om goede voorspellingen te maken (zie bvb. W. Rizkallah, Journal of Big Data, 2025). Ook in de industrie kom ik vaak algorithmen tegen zoals LightGBM die variaties zijn op de beroemde GBM.]]></summary></entry><entry><title type="html">Intégrer la recherche web à Claude Desktop sur Linux Mint</title><link href="http://localhost:4000/blog/2025/05/07/claude-mcp.html" rel="alternate" type="text/html" title="Intégrer la recherche web à Claude Desktop sur Linux Mint" /><published>2025-05-07T00:00:00+02:00</published><updated>2025-05-07T00:00:00+02:00</updated><id>http://localhost:4000/blog/2025/05/07/claude-mcp</id><content type="html" xml:base="http://localhost:4000/blog/2025/05/07/claude-mcp.html"><![CDATA[<h1 id="intégrer-la-recherche-web-à-claude-desktop-sur-linux-mint">Intégrer la recherche web à Claude Desktop sur Linux Mint</h1>
+
+<p>Cet article explique comment ajouter la recherche web à Claude Desktop sur Linux
+en utilisant le protocole MCP (Model Context Protocol), qui permet aux modèles d’IA d’utiliser des outils externes. Cela se fait en trois étapes:</p>
+<ul>
+  <li>L’installation du client Claude Desktop sous Linux</li>
+  <li>La configuration d’un premier serveur MCP donnant au modèle accès aux fichiers locaux. Cela à des fins de familiarisation.</li>
+  <li>La configuration d’un serveur comprenant les fonctionnalités de recherche web.</li>
+</ul>
+
+<p>L’objectif est de permettre au modèle de repondre a des questions avec des informations actuellement disponible en ligne.</p>
+
+<ul>
+  <li><a href="#intégrer-la-recherche-web-à-claude-desktop-sur-linux-mint">Intégrer la recherche web à Claude Desktop sur Linux Mint</a>
+    <ul>
+      <li><a href="#installation-de-claude-desktop-sur-linux">Installation de Claude Desktop sur Linux</a></li>
+      <li><a href="#configurer-un-premier-serveur-mcp">Configurer un premier serveur MCP</a></li>
+      <li><a href="#ajouter-le-serveur-brave-search-pour-la-recherche-brave">Ajouter le serveur brave-search pour la recherche brave</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="installation-de-claude-desktop-sur-linux">Installation de Claude Desktop sur Linux</h2>
+<p>Dans ce tutoriel, j’installe <a href="https://claude.ai/download">Claude Desktop</a> sur
+une instance de Linux Mint 22.1. Linux Mint est une distribution Linux assez
+populaire basée sur Debian.</p>
+
+<p>Il n’y a présentement pas de version officielle de Claude Desktop disponible
+pour Linux. L’alternative que j’ai trouvée est ce projet sur <em>github</em>:
+<a href="https://github.com/aaddrick/claude-desktop-debian">claude-desktop-debian</a>.
+C’est une adaptation de la version Windows et elle est compatible avec
+le protocole MCP. Le protocole MCP permet au client Claude d’accéder à des
+outils incluant la recherche web que je vais configurer.</p>
+
+<p><img src="/blog/assets/claude_mcp/claude_desktop_linux.png" alt="Alt" /></p>
+
+<p>Pour installer cette adaptation du client Claude, il faut
+avoir accès au programme en ligne de commande <em>git</em>. Pour installer <em>git</em>, il suffit de taper</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt get <span class="nb">install </span>git
+</code></pre></div></div>
+<p>dans son terminal (en incluant l’accès administratif <em>sudo</em> si nécessaire).</p>
+
+<p>Ensuite, il faut cloner le dépôt git de <a href="">claude-desktop-debian</a>, puis lancer
+le <em>build</em> script pour générer un paquet <em>.deb</em>. Pour ce faire, j’exécute cette
+commande dans mon répertoire <em>~/Documents/</em>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Clone this repository</span>
+git clone https://github.com/aaddrick/claude-desktop-debian.git
+<span class="nb">cd </span>claude-desktop-debian
+
+<span class="c"># Build the package (Defaults to .deb and cleans build files)</span>
+./build.sh
+</code></pre></div></div>
+
+<p>Le <em>build</em> script est bien fait et s’occupe d’installer les dépendances
+nécessaires avant l’installation du client Claude lui-même. Ce processus prend
+quelques minutes, assez pour se préparer un café.</p>
+
+<p>Le <em>build</em> va générer un fichier semblable à
+<em>claude-desktop_{version_number}_{architecture}.deb</em> dans le répertoire
+<em>claude-desktop-debian</em>. Dans mon cas, le fichier <em>.deb</em> est
+<em>claude-desktop_0.9.3_amd64.deb</em>. Pour installer le paquet, je commence par exécuter</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">chmod</span> +x claude-desktop_0.9.3_amd64.deb
+</code></pre></div></div>
+<p>ce qui fait du paquet un fichier exécutable. Ensuite, j’installe le paquet avec la commande</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt get <span class="nb">install </span>claude-desktop_0.9.3_amd64.deb
+</code></pre></div></div>
+
+<p>Une fois l’installation complétée, le client Claude devrait pouvoir être lancé à partir du terminal avec</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>claude-desktop
+</code></pre></div></div>
+<p>Pour tester, je m’identifie dans l’application avec mon compte google et j’envoie une petite requête comme <em>Hello</em> dans le menu de discussion.</p>
+
+<h2 id="configurer-un-premier-serveur-mcp">Configurer un premier serveur MCP</h2>
+<p>Au lancement, le client Claude Desktop analyse le fichier
+<em>~/.config/Claude/claude_desktop_config.json</em> pour découvrir d’éventuels outils.
+Lorsque découverts, ces outils peuvent être utilisés par le Large Language Model
+(LLM) pour répondre aux requêtes de l’utilisateur.</p>
+
+<p>Par exemple, un outil météo permet au LLM de consulter la météo sur internet.
+Pour s’assurer que ces outils sont bien utilisés, il faut être suffisamment explicite
+dans la formulation de ses requêtes. Par exemple, demander <em>Utilise l’outil
+météo pour donner la météo d’aujourd’hui</em> à la place de <em>Donne la météo
+d’aujourd’hui</em>. Dans le second cas, le LLM a moins de chance de consulter
+l’outil et va alors donner une réponse comme: <em>mon contexte ne me donne pas
+accès aux informations quotidiennes de météo</em>.</p>
+
+<p>Initialement, le fichier <em>claude_desktop_config.json</em> n’existera probablement
+pas, donc il va falloir le créer avec:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">touch</span> ~/.config/Claude/claude_desktop_config.json
+</code></pre></div></div>
+
+<p>Pour se familiariser avec la configuration des serveurs MCP, je recommande de
+configurer le serveur <em>filesystem</em>. Le serveur <em>filesystem</em> comporte des outils
+permettant de lire, créer et modifier des fichiers sur votre système local. Le
+client Claude va toujours demander la permission avant d’utiliser un outil et il
+est nécessaire de lire ces demandes de permission pour éviter des gros soucis.</p>
+
+<p>Cette partie du tutoriel est tirée de
+<a href="https://modelcontextprotocol.io/quickstart/user">MCP-Quickstart</a>. Il suffit
+alors de copier coller le texte suivant dans le fichier
+<em>claude_desktop_config.json</em></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"filesystem"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"npx"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"-y"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"@modelcontextprotocol/server-filesystem"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"/Users/username/Desktop"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"/Users/username/Downloads"</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Les arguments <em>/Users/username/Desktop/</em> et <em>/Users/username/Downloads/</em> fournissent
+les portes d’acces que peut utiliser le LLM pour chercher et modifier nos
+fichiers. Ils doivent donc être adapter autant que nécessaire. Dans mon cas,
+j’ai la configuration suivante:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"filesystem"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"npx"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"-y"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"@modelcontextprotocol/server-filesystem"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"/home/marc/Documents/"</span><span class="p">,</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Ce texte de configuration étant inclut au fichier <em>claude_desktop_config.json</em>,
+il faut s’assurer d’avoir la dépendance <em>node js</em> sur votre système. Cela est
+nécessaire pour l’installation et le lancement des serveurs MCP utilisant la
+commande <em>npx</em>. Pour une distribution de type Debian comme Linux Mint, le plus simple
+est d’exécuter ce <a href="https://nodejs.org/en/download">script</a> dans son terminal:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Download and install nvm:</span>
+curl <span class="nt">-o-</span> https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+<span class="c"># in lieu of restarting the shell</span>
+<span class="se">\.</span> <span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/.nvm/nvm.sh"</span>
+
+<span class="c"># Download and install Node.js:</span>
+nvm <span class="nb">install </span>22
+
+<span class="c"># Verify the Node.js version:</span>
+node <span class="nt">-v</span> <span class="c"># Should print "v22.15.0".</span>
+nvm current <span class="c"># Should print "v22.15.0".</span>
+
+<span class="c"># Verify npm version:</span>
+npm <span class="nt">-v</span> <span class="c"># Should print "10.9.2".</span>
+</code></pre></div></div>
+
+<p>Une fois cela fait, je ferme et réouvre Claude Desktop en exécutant</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>claude-desktop
+</code></pre></div></div>
+
+<p>Je peux alors tester le serveur filesystem en demandant <em>What folders are in my
+Documents</em>, et après avoir donné les permissions demandées, j’obtiens la réponse:
+*There’s one folder in your Documents directory called “claude-desktop-debian”.</p>
+
+<h2 id="ajouter-le-serveur-brave-search-pour-la-recherche-brave">Ajouter le serveur brave-search pour la recherche brave</h2>
+<p>Ce test étant réussi. On peut maintenant passer au moteur de recherche. Pour la
+recherche j’utilise le serveur brave-search étant donné que son installation et
+utilisation est relativement simple. Il utilise aussi la même dépendance <em>node
+js</em>.</p>
+
+<p>La première étape consiste à générer une clé API sur le site web de Brave. Pour
+ce faire, un compte utilisateur est créé sur brave search api. Par la suite, le
+bouton <em>Add API key</em> du menu API keys permet d’ajouter une clé API au compte.</p>
+
+<p><img src="/blog/assets/claude_mcp/api_key_brave_search.png" alt="Alt" /></p>
+
+<p>Celle-ci est ensuite ajoutée au fichier de configuration
+<em>claude_desktop_config.json</em>. Le format attendu pour la configuration est donne
+sur ce projet <a href="https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search">github</a>.</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"brave-search"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"npx"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"-y"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"@modelcontextprotocol/server-brave-search"</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"BRAVE_API_KEY"</span><span class="p">:</span><span class="w"> </span><span class="s2">"YOUR_API_KEY_HERE"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Pour préserver les outils <em>filesystem</em>, il faut adjoindre cette configuration à
+celle donnée ci-dessous. Je donne un exemple pertinent au bas de ce tutoriel.</p>
+
+<p>Après avoir inséré la clé et édité la configuration, je consulte un validateur json
+sur internet pour vérifier que le fichier config n’a pas
+d’erreur de syntaxe. En faisant cela, je m’assure de ne pas inclure une clé API
+valide dans le texte vérifié.</p>
+
+<p>Une fois cela fait, on ferme et réouvre <em>claude-desktop</em> une nouvelle fois. Je
+pose maintenant cette question “Search online what is the weather today”. Si la
+configuration est correcte, le client Claude va demander d’utiliser l’outil
+brave_web_search avant de donner une réponse plus ou moins valide.</p>
+
+<p><img src="/blog/assets/claude_mcp/weather_today.png" alt="Alt" /></p>
+
+<p>Si cela fonctionne, félicitations! Dans le cas contraire, voici un exemple pour référence:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"filesystem"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"npx"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"-y"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"@modelcontextprotocol/server-filesystem"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"/Users/marc/"</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"brave-search"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"npx"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"-y"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"@modelcontextprotocol/server-brave-search"</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"BRAVE_API_KEY"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BSA7Krtfakekey"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Intégrer la recherche web à Claude Desktop sur Linux Mint]]></summary></entry><entry><title type="html">Getting maths to render on this blog</title><link href="http://localhost:4000/blog/2025/04/27/math-syntax.html" rel="alternate" type="text/html" title="Getting maths to render on this blog" /><published>2025-04-27T00:00:00+02:00</published><updated>2025-04-27T00:00:00+02:00</updated><id>http://localhost:4000/blog/2025/04/27/math-syntax</id><content type="html" xml:base="http://localhost:4000/blog/2025/04/27/math-syntax.html"><![CDATA[<h1 id="going-insane-trying-to-get-math-to-render-on-this-blog">Going insane trying to get math to render on this blog</h1>
+<p>I realized last week that mathematical equations would not render when writing
+on this blog. I had a wild ride trying to get this working already, but now the time
+has come to get those equations to render.</p>
+
+<p>By rendering math, I mean getting LaTeX syntax to show up as nice, high
+resolution pictures or scalable vector graphics. This blog post will end with
+such graphics.</p>
+
+<h2 id="methodology">Methodology</h2>
+<p>My approach is to give the google’s Gemini 2.5 Flash large language model (LLM)
+as much context as possible about the issue. Namely, I give:</p>
+<ul>
+  <li>The structure of the blog’s project, so the folders and files within.</li>
+  <li>That I am using github pages to deploy the blog.</li>
+  <li>What is in the _config.yml file of my blog.</li>
+  <li>The issue itself, namely that I’d like to see something like $\frac{x}{2}$
+rendered properly (if it does not show up as mangled LaTeX, the mission was successful).</li>
+</ul>
+
+<p>As a sidenote, I started using the Pro and Flash iterations of the Gemini 2.5
+model last week and really like them. At the moment, the experimental versions
+of the model are free as in free beer.</p>
+
+<h2 id="taking-the-llm-to-heart">Taking the LLM to heart</h2>
+<p>The first recommendation of the LLM is to create a <code class="language-plaintext highlighter-rouge">default.html</code> layout that
+overrides the basic <em>minima</em> layout of the blog.</p>
+
+<p>To do this, I copy and paste the main blog page to default.html and add some
+instructions to import <em>mathjax</em>. <em>mathjax</em> is the package that should render
+the maths.</p>
+
+<p>Doing this destroys the blog’s styling and does not render the maths.</p>
+
+<h2 id="it-works-on-the-llms-computer">It works on the LLM’s computer</h2>
+<p>The approach is to instead extend the default <em>minima</em> style of the blog. So I
+get rid of <code class="language-plaintext highlighter-rouge">default.html</code> and create a <code class="language-plaintext highlighter-rouge">math.html</code> file instead. In that file, I
+include a kind of markdown layer where I specify that the layout is <em>default</em>.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
+layout: default
+---
+
+<span class="c">&lt;!-- Add this MathJax script --&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">async</span>
+    <span class="na">src=</span><span class="s">"https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;/script&gt;</span>
+<span class="c">&lt;!-- End of MathJax script --&gt;</span>
+</code></pre></div></div>
+
+<p>The LLM assures me that it tried this solution and that it worked. It does not. The blog’s style is back, but the math is not rendering.</p>
+
+<p>As a check, I put the <em>mathjax</em> import script directly in this blog post.</p>
+
+<p>This also did not work. In a further query, the LLM recommended I include
+<em>mathjax</em> explicitly in my <code class="language-plaintext highlighter-rouge">_config.yml</code>.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">title</span><span class="pi">:</span> <span class="s">Tapestry of flimsy steps</span>
+<span class="na">author</span><span class="pi">:</span> <span class="s">Marc-André Chénier</span>
+<span class="na">theme</span><span class="pi">:</span> <span class="s">minima</span>
+
+<span class="na">kramdown</span><span class="pi">:</span>
+  <span class="na">math_engine</span><span class="pi">:</span> <span class="s">mathjax</span>
+  <span class="na">syntax_highlighter</span><span class="pi">:</span> <span class="s">rouge</span>
+  <span class="na">input</span><span class="pi">:</span> <span class="s">GFM</span> <span class="c1"># Optional: Use GitHub Flavored Markdown</span>
+</code></pre></div></div>
+
+<p>I had good hopes, but this approach also failed. The next suggestion is to sandwich LaTeX expressions in a
+<em>raw</em> html routine. Again, without success.</p>
+
+<h2 id="other-attempts">Other attempts</h2>
+<p>Here is an inline fraction:
+(\frac{x}{2}).</p>
+
+<p>Here is a display equation:
+[ a^2 + b^2 = c^2 ]</p>
+
+<p>This should be the one…</p>
+
+\[\int x^2y \delta x\]
+
+<h2 id="at-last">At last</h2>
+<p>What got things rolling is finding out about <a href="https://github.com/Csega/csega.github.io">csega’s
+blog</a> blog. He has a post on there
+where he makes a similarly heroic attempt to render $\frac{x}{2}$. Since he’s
+also using <em>jekyll</em> as his site generator, it gave me confidence this feat is
+possible.</p>
+
+<p>I then went ahead and installed <em>jekyll</em> locally so I could serve and quickly debug the website from my laptop. This can be done with</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll serve
+</code></pre></div></div>
+
+<p>I had some issues getting <em>jekyll</em> to compile but most were solved with a variation of:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem <span class="nb">install</span> ...
+</code></pre></div></div>
+
+<p><em>Gem</em> is <em>Ruby</em>’s package manager. With this set-up, debugging went a lot
+faster. I also went ahead and <em>vibe-coded</em> the rest with <em>cline</em>.</p>
+
+<p><em>Cline</em> is an extension for the <em>VS Code</em> editor. It gives you a chat interface
+for LLMs, along with some tools to read and edit your project files. Very much
+like <em>Cursor</em>, except that you can set it up with an API of your choice without
+having to pay a subscription.</p>
+
+<p>On the one hand, I could have spent this sunny afternoon reading jekyll’s and
+github pages documentation at length instead of iterating with an LLM. On the other hand, some blockers are nice to just push aside with <em>vibe-coding</em>.</p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Going insane trying to get math to render on this blog I realized last week that mathematical equations would not render when writing on this blog. I had a wild ride trying to get this working already, but now the time has come to get those equations to render.]]></summary></entry><entry><title type="html">Statistical approach to a 2 by 2 crossover design</title><link href="http://localhost:4000/blog/2025/04/21/crossover-design.html" rel="alternate" type="text/html" title="Statistical approach to a 2 by 2 crossover design" /><published>2025-04-21T00:00:00+02:00</published><updated>2025-04-21T00:00:00+02:00</updated><id>http://localhost:4000/blog/2025/04/21/crossover-design</id><content type="html" xml:base="http://localhost:4000/blog/2025/04/21/crossover-design.html"><![CDATA[<h1 id="statistical-approach-to-a-2-by-2-crossover-design">Statistical approach to a 2 by 2 crossover design</h1>
+<ul>
+  <li><a href="#statistical-approach-to-a-2-by-2-crossover-design">Statistical approach to a 2 by 2 crossover design</a>
+    <ul>
+      <li><a href="#question">Question</a></li>
+      <li><a href="#two-questions-in-one">Two questions in one</a></li>
+      <li><a href="#whats-a-crossover-design">What’s a crossover design?</a></li>
+      <li><a href="#multiple-outcomes-of-interest">Multiple outcomes of interest</a></li>
+      <li><a href="#tackling-the-first-question">Tackling the first question</a></li>
+      <li><a href="#tackling-the-second-question">Tackling the second question</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="question">Question</h2>
+<p>This blog post is taken from a question I answered on cross validated during
+the week-end. I have had this blog on the backburner for a while, and that is as
+good of an opportunity to properly start it as I will get. You can find the <em>q &amp;
+a</em> thread here:
+<a href="https://stats.stackexchange.com/questions/664399/which-statistical-test-would-you-recommend-for-comparing-two-interventions-in-a/664416#664416">cross-validated</a>.
+The original question from user <em>AB108</em> is:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>I’m conducting a randomized crossover trial with 16 participants, where each
+subject receives two interventions (sub-occipital muscle inhibition and deep
+breathing). For each intervention, heart rate variability (HRV) metrics (e.g.,
+RMSSD and HF) are recorded before and after the intervention.
+
+I’m aiming to determine whether one intervention leads to greater
+parasympathetic activation than the other, based on these HRV measures.
+
+The design involves: Repeated measures (pre and post) Two conditions per
+participant A small sample size (n = 17) A few potential covariates (e.g.,
+stress level, respiratory rate)
+
+ What statistical approach would you recommend for analyzing this kind of data?
+ Would you use a method that compares pre/post differences (deltas), or would
+you suggest a model that incorporates all measurements directly? I'm
+particularly interested in approaches that account for within-subject
+variability and repeated measures.
+</code></pre></div></div>
+
+<p>Here are initial thoughts about the question:</p>
+<ul>
+  <li>It is actually two questions in one</li>
+  <li>I have not heard of crossover design before</li>
+  <li>There are multiple outcomes of interest and it is not clear how the inquirer
+plans to combine or include them in his analysis.</li>
+  <li><em>AB108</em> (the inquirer) is interested about including covariates in the analysis.</li>
+</ul>
+
+<h2 id="two-questions-in-one">Two questions in one</h2>
+<p>The first question is about the desirability of analysing the pre-post
+difference in outcomes. For example, this could be taking the difference in
+RMSSD. Typically, a pre-post analysis would denote taking the difference of the
+outcome after versus the outcome before receiving a treatment, but here we are
+comparing two treatments: sub-occipital muscle inhibition and deep breathing. So
+we just take the difference in outcome between two treatments, and forget about
+the baseline (i.e. not treatment).</p>
+
+<p>In general, a pre-post analysis is a waste of time. You can often
+argue that something unrelated to the difference of interest happens between the two
+interventions given to a subject. That makes it difficult to defend a causal
+statement.</p>
+
+<p>Nevertheless, taking a pre-post difference does control for what is known as
+time-invariant subject characteristics. Those are things like your natural hair
+color or your neuroticism. To be a bit more precise, a time-invariant
+characteristic is something that stays constant during the period of the
+experiment. That makes taking the pre-post difference a good tactic to reduce
+the variation of the outcome of interest (for ex. the RMSSD here). At equal
+sample size, this increases the power of a statistical test on that difference.</p>
+
+<p>The second question: <em>would you suggest a model that incorporates all
+measurements directly?</em> is unclear. Namely if it is suggested to include <em>all
+measurements</em> in a model. Assuming they are valid, I would not exclude
+measurements from an analysis, regardless of whether I am specifying a
+statistical model or not.</p>
+
+<p>I chose to interpret it as whether it is worth it to specify a model. A model
+lets us control for additional measured covariates such as stress level, so it
+can be advantageous. However, including additional covariates is touchy,
+especially with a small sample size. The covariates have to be strongly
+correlated with the outcomes and at most weakly correlated with the treatment or
+they could induce bias and/or variation in the difference estimate between
+sub-occipital muscle inhibitiion and deep breathing. That’s a judgment call that
+I leave to the subject-matter expert.</p>
+
+<h2 id="whats-a-crossover-design">What’s a crossover design?</h2>
+<p>The crossover design is a clever way to control for the time-invariant
+characteristics of subjects while removing eventual bias from the time spent in
+observation. For example, you can imagine that bias appearing
+with subjects getting more comfortable with the experimental setting
+between the initial and the post-treatment outcome measurements.</p>
+
+<p>To control for bias due to such uncontrolled time-dependent effects, a crossover
+design split the subjects into treatment branches. Each branch receives the
+treatments or lack thereof (for ex. placebo), in a different sequence. In the
+question, the inquirer is tackling a case with two observations, <em>pre and post</em>,
+and two treatment, sub-occipital muscle inhibition and deep breathing. Subjects
+in the first branch then get one treatment, say muscle inhibition, at the <em>pre</em>
+observation period, while subjects in the second treatment branch receive deep
+breathing in the <em>pre</em> period. In the second period of observation, <em>post</em>, each
+branch gets the alternative treatment.</p>
+
+<p>This split into sequences or branches of treatment sounds like a lot of trouble,
+but it allows control for time-dependent effects across subjects in the
+analysis. Concretely, this can be done with a statistical model or by simply
+taking the difference of the treatment differences between the treatment
+branches. Shared time-dependent effects between treatment branches are removed
+by taking this difference.</p>
+
+<p>In theory, a crossover design is great because it isolates the difference in
+treatment effects from spurious time-related things better while keeping
+statistical power relatively high with its measurement of within-subject
+outcomes. I recommend looking at this clear review paper for a better intuition
+of the experimental design: <a href="https://epidownload.i-med.ac.at/download/public/LV%20Ulmer/moi/A%20Series%20on%20Evaluation%20of%20Scientific%20Publications%20%20-%20Deutsches%20%C3%84rzteblatt/Part%2018-On%20the%20Proper%20Use%20of%20the%20Crossover%20Design%20in%20Clinical%20Trials.pdf">On the proper use of the crossover design in
+clinical
+trials</a></p>
+
+<p>In practice, you have to account with a so-called wash-out effect. That is the
+effect of one treatment having an effect on the next one given to a subject.</p>
+
+<h2 id="multiple-outcomes-of-interest">Multiple outcomes of interest</h2>
+<p>There are multiple outcomes of interest: RMSSD, HF and fellow user <em>jginestet</em>
+points to a paper (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5624990/">An overview of heart rate variability
+metrics</a>) listing 26 measures
+relevant to the analysis of heart rate variability (HRV).</p>
+
+<p>Multiple outcomes is a hornet nest for analysts. Outcomes can be combined in all
+sorts of way during an analysis with more or less unsavory results. I chose to
+ignore this problem and focus on the analysis of a single outcome. User
+<em>jginestet</em> tackles this issue directly and gives relevant recommendations with
+regard to the multiple comparison problems, multivariate statistical modeling
+and small sample analysis.</p>
+
+<h2 id="tackling-the-first-question">Tackling the first question</h2>
+<p><strong>Whether to use a method that compares pre/post differences?</strong></p>
+
+<p>The classical two-step approach to crossover design analysis with 2 repeated
+measures per participant suggests comparing the pre-post differences first. This
+gives a within-subject effect estimate but doesn’t control for period effects
+(e.g., getting used to the experiment). That’s where the second step of the approach comes in.</p>
+
+<p>After the first step, take the means of these differences per treatment branch (two branches in this design). In the second step, compute the difference between these two means (e.g., muscle inhibition → deep breathing average minus deep breathing → muscle inhibition average). This removes any additive period effect.</p>
+
+<p>In practice, I’d handle the first step manually and use software to do an independent samples t-test at the second step. Here’s an example in R:</p>
+
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># First step: difference within subjects</span><span class="w">
+</span><span class="n">crossover_patient_split</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">split</span><span class="p">(</span><span class="n">crossover_data</span><span class="p">,</span><span class="w"> </span><span class="n">crossover_data</span><span class="o">$</span><span class="n">PatientID</span><span class="p">)</span><span class="w">
+</span><span class="n">patient_diff_df</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">do.call</span><span class="p">(</span><span class="s2">"rbind"</span><span class="p">,</span><span class="w">
+  </span><span class="n">lapply</span><span class="p">(</span><span class="n">crossover_patient_split</span><span class="p">,</span><span class="w"> </span><span class="n">FUN</span><span class="o">=</span><span class="k">function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="n">data.frame</span><span class="p">(</span><span class="w">
+      </span><span class="n">period_diff</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="o">$</span><span class="n">X</span><span class="p">[</span><span class="n">x</span><span class="o">$</span><span class="n">Period</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">x</span><span class="o">$</span><span class="n">X</span><span class="p">[</span><span class="n">x</span><span class="o">$</span><span class="n">Period</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="m">2</span><span class="p">]),</span><span class="w">  </span><span class="c1"># Corrected syntax</span><span class="w">
+      </span><span class="n">PatientID</span><span class="o">=</span><span class="n">x</span><span class="o">$</span><span class="n">PatientID</span><span class="p">[</span><span class="m">1</span><span class="p">],</span><span class="w">
+      </span><span class="n">Sequence</span><span class="o">=</span><span class="n">x</span><span class="o">$</span><span class="n">Sequence</span><span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w">  </span><span class="c1"># Seq. 1: A→B, Seq. 2: B→A</span><span class="w">
+    </span><span class="p">)</span><span class="w">
+  </span><span class="p">})</span><span class="w">
+</span><span class="p">)</span><span class="w">
+
+</span><span class="c1"># Second step: t-test on the difference between sequences</span><span class="w">
+</span><span class="n">t.test</span><span class="p">(</span><span class="w">
+  </span><span class="n">period_diff</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">Sequence</span><span class="p">,</span><span class="w">
+  </span><span class="n">data</span><span class="o">=</span><span class="n">patient_diff_df</span><span class="p">,</span><span class="w">
+  </span><span class="n">var.equal</span><span class="o">=</span><span class="kc">TRUE</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>In <a href="https://epidownload.i-med.ac.at/download/public/LV%20Ulmer/moi/A%20Series%20on%20Evaluation%20of%20Scientific%20Publications%20%20-%20Deutsches%20%C3%84rzteblatt/Part%2018-On%20the%20Proper%20Use%20of%20the%20Crossover%20Design%20in%20Clinical%20Trials.pdf">On the proper use of the crossover design in clinical
+trials</a>,
+they recommend a Wilcoxon rank-sum test instead of a t-test if non-normality is
+suspected in the within-subject differences. With small samples and continuous
+outcomes, non-normality often arises due to outliers.</p>
+
+<h2 id="tackling-the-second-question">Tackling the second question</h2>
+<p><strong>Would you suggest a model that incorporates all measurements directly?</strong></p>
+
+<p>In the $2 \times 2$ crossover design, the main advantage of a model is its ability to
+include time-varying covariates like respiratory rate. I also find this approach
+more straightforward: you directly control for subject and period effects while
+directly estimating the treatment difference.</p>
+
+<p>Here’s a R linear regression example producing the same t-statistic as the two-step approach:</p>
+<div class="language-R highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">fit1</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">lm</span><span class="p">(</span><span class="n">X</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">Treatment</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">factor</span><span class="p">(</span><span class="n">PatientID</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Period</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="o">=</span><span class="n">crossover_data</span><span class="p">)</span><span class="w">
+</span><span class="n">summary</span><span class="p">(</span><span class="n">fit1</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">Treatment</code> variable could represent muscle inhibition or deep breathing
+depending on the prefered interpretation. The model explicitely controls for
+subject and period effects. The treatment branch mentioned above isn’t
+explicitly included but allows the identification of the period effect.</p>
+
+<p>A peek at the data structure:</p>
+
+<p><img src="/blog/assets/crossover_data_example.png" alt="Alt" /></p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[Statistical approach to a 2 by 2 crossover design Statistical approach to a 2 by 2 crossover design Question Two questions in one What’s a crossover design? Multiple outcomes of interest Tackling the first question Tackling the second question]]></summary></entry><entry><title type="html">Launching this blog</title><link href="http://localhost:4000/blog/2024/09/29/launch.html" rel="alternate" type="text/html" title="Launching this blog" /><published>2024-09-29T00:00:00+02:00</published><updated>2024-09-29T00:00:00+02:00</updated><id>http://localhost:4000/blog/2024/09/29/launch</id><content type="html" xml:base="http://localhost:4000/blog/2024/09/29/launch.html"><![CDATA[<p>This post will probably be removed once the blog gets some steam. Until then, it will be a reminder of its humble beginning.</p>]]></content><author><name>Marc-André Chénier</name></author><summary type="html"><![CDATA[This post will probably be removed once the blog gets some steam. Until then, it will be a reminder of its humble beginning.]]></summary></entry></feed>
