@@ -31,7 +31,7 @@ La date de naissance influence le sport pratiqué. Elle influence aussi l'âge a
 
 Il n'y a pas de flèche de `S` vers `A` puisque le sport n'a aucun effet causal dans cet exemple. L'exclusion des athlètes encore en vie n'est pas représentée dans ce DAG. C'est un biais séparé.
 
-`Y` est donc un collider entre `N` et `A`. Le chemin `N -> Y <- A` est fermé tant qu'on ne contrôle pas pour `Y`. Ce contrôle ouvre le chemin `S <- N -> Y <- A`. Il ne ferme pas le chemin `S <- N -> A` qui confond déjà l'effet du sport avec celui de la cohorte de naissance.
+`Y` est donc un collider entre `N` et `A`. Le chemin `N -> Y <- A` est fermé tant qu'on ne contrôle pas pour `Y`. Ce contrôle ouvre le chemin `S <- N -> Y <- A`.
 
 Prenons deux personnes mortes en 1980. Une personne née en 1900 est morte à 80 ans. Une personne née en 1944 est morte à 36 ans. À date de décès égale, la personne née le plus tard est nécessairement morte plus jeune. Si les cohortes récentes pratiquent plus souvent un sport, le contrôle pour la date de décès associe ce sport à une mort plus jeune.
 
